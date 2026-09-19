@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/hr_mobile_ui.dart';
+
 import '../../services/company_account_service.dart';
 
 class SecurityScreen extends StatelessWidget {
   const SecurityScreen({super.key});
 
   Future<void> _openPasswordEditor(BuildContext context) async {
-    final changed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
+    final changed = await showHrSheet<bool>(
+      context,
       builder: (_) => const _PasswordEditor(),
     );
     if (changed == true && context.mounted) {
@@ -169,171 +168,85 @@ class _PasswordEditorState extends State<_PasswordEditor> {
   }
 
   @override
-  Widget build(BuildContext context) => FractionallySizedBox(
-    heightFactor: .76,
-    child: Material(
-      color: const Color(0xFFF8FAFC),
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 10, 12, 14),
-            color: Colors.white,
-            child: Column(
-              children: [
-                Container(
-                  width: 42,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFCBD5E1),
-                    borderRadius: BorderRadius.circular(10),
+  Widget build(BuildContext context) => HrSheet(
+    title: 'Change Password',
+    busy: _saving,
+    footer: HrSaveButton(
+      label: 'Save Changes',
+      busy: _saving,
+      onPressed: _save,
+    ),
+    body: Form(
+      key: _key,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            if (_error != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  _error!,
+                  style: const TextStyle(
+                    color: Color(0xFFB91C1C),
+                    fontSize: 11,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Change Password',
-                            style: TextStyle(
-                              color: Color(0xFF0F172A),
-                              fontSize: 19,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Text(
-                            'Confirm your identity and choose a new password',
-                            style: TextStyle(
-                              color: Color(0xFF64748B),
-                              fontSize: 10,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Close',
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-                  ],
-                ),
-              ],
+              ),
+              const SizedBox(height: 14),
+            ],
+            _passwordField(
+              controller: _current,
+              label: 'Current password',
+              visible: _showCurrent,
+              toggle: () => setState(() => _showCurrent = !_showCurrent),
             ),
-          ),
-          Expanded(
-            child: Form(
-              key: _key,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  children: [
-                    if (_error != null) ...[
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF2F2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          _error!,
-                          style: const TextStyle(
-                            color: Color(0xFFB91C1C),
-                            fontSize: 11,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                    ],
-                    _passwordField(
-                      controller: _current,
-                      label: 'Current password',
-                      visible: _showCurrent,
-                      toggle: () =>
-                          setState(() => _showCurrent = !_showCurrent),
-                    ),
-                    _passwordField(
-                      controller: _password,
-                      label: 'New password',
-                      visible: _showPassword,
-                      toggle: () =>
-                          setState(() => _showPassword = !_showPassword),
-                      isNew: true,
-                    ),
-                    _passwordField(
-                      controller: _confirmation,
-                      label: 'Confirm new password',
-                      visible: _showConfirmation,
-                      toggle: () => setState(
-                        () => _showConfirmation = !_showConfirmation,
-                      ),
-                      confirmation: true,
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(13),
-                        border: Border.all(color: const Color(0xFFE2E8F0)),
-                      ),
-                      child: Column(
-                        children: [
-                          _Requirement(
-                            text: 'Minimum 6 characters',
-                            valid: _password.text.length >= 6,
-                          ),
-                          const SizedBox(height: 8),
-                          _Requirement(
-                            text: 'New passwords match',
-                            valid:
-                                _confirmation.text.isNotEmpty &&
-                                _password.text == _confirmation.text,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+            _passwordField(
+              controller: _password,
+              label: 'New password',
+              visible: _showPassword,
+              toggle: () => setState(() => _showPassword = !_showPassword),
+              isNew: true,
+            ),
+            _passwordField(
+              controller: _confirmation,
+              label: 'Confirm new password',
+              visible: _showConfirmation,
+              toggle: () =>
+                  setState(() => _showConfirmation = !_showConfirmation),
+              confirmation: true,
+            ),
+            const SizedBox(height: 4),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(13),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
+                children: [
+                  _Requirement(
+                    text: 'Minimum 6 characters',
+                    valid: _password.text.length >= 6,
+                  ),
+                  const SizedBox(height: 8),
+                  _Requirement(
+                    text: 'New passwords match',
+                    valid:
+                        _confirmation.text.isNotEmpty &&
+                        _password.text == _confirmation.text,
+                  ),
+                ],
               ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x100F172A),
-                  blurRadius: 12,
-                  offset: Offset(0, -4),
-                ),
-              ],
-            ),
-            child: SafeArea(
-              top: false,
-              child: ElevatedButton.icon(
-                onPressed: _saving ? null : _save,
-                icon: _saving
-                    ? const SizedBox.square(
-                        dimension: 19,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.shield_outlined),
-                label: Text(_saving ? 'Updating...' : 'Save New Password'),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

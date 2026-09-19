@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/job_vacancy.dart';
+import '../../widgets/hr_mobile_ui.dart';
 import '../../services/jobs_service.dart';
 
 class JobFormPage extends StatefulWidget {
@@ -16,6 +17,7 @@ class _JobFormPageState extends State<JobFormPage> {
   late final Map<String, TextEditingController> _fields;
   late String _type, _level, _status;
   bool _saving = false;
+  String? _error;
 
   @override
   void initState() {
@@ -68,12 +70,7 @@ class _JobFormPageState extends State<JobFormPage> {
       }
     } on JobsException catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.message),
-            backgroundColor: const Color(0xFFDC2626),
-          ),
-        );
+        setState(() => _error = e.message);
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -81,20 +78,28 @@ class _JobFormPageState extends State<JobFormPage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.white,
-      title: Text(
-        widget.job == null ? 'Create New Job' : 'Edit Job Vacancy',
-        style: const TextStyle(fontWeight: FontWeight.w800),
-      ),
+  Widget build(BuildContext context) => HrSheet(
+    title: widget.job == null ? 'Create New Job' : 'Edit Job Vacancy',
+    subtitle: 'Role information, requirements and benefits',
+    busy: _saving,
+    footer: HrSaveButton(
+      label: widget.job == null ? 'Publish Job' : 'Save Changes',
+      busy: _saving,
+      onPressed: _save,
     ),
     body: Form(
       key: _key,
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: Color(0xFFB91C1C)),
+              ),
+            ),
           const _FormHeading(
             'Role information',
             'Define the position and its team.',
@@ -107,26 +112,39 @@ class _JobFormPageState extends State<JobFormPage> {
           _field('location', 'Location', Icons.location_on_outlined),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _type,
             decoration: const InputDecoration(labelText: 'Employment type'),
-            items: [
-              'Full-time',
-              'Part-time',
-              'Contract',
-              'Remote',
-            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            items: {_type, 'Full-time', 'Part-time', 'Contract', 'Remote'}
+                .map(
+                  (v) => DropdownMenuItem(
+                    value: v,
+                    child: Text(v, overflow: TextOverflow.ellipsis),
+                  ),
+                )
+                .toList(),
             onChanged: (v) => setState(() => _type = v!),
           ),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _level,
             decoration: const InputDecoration(labelText: 'Experience level'),
-            items: [
-              'Entry Level',
-              'Mid Level',
-              'Senior Level (5+ Yrs)',
-              'Lead',
-            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            items:
+                {
+                      _level,
+                      'Entry Level',
+                      'Mid Level',
+                      'Senior Level (5+ Yrs)',
+                      'Lead',
+                    }
+                    .map(
+                      (v) => DropdownMenuItem(
+                        value: v,
+                        child: Text(v, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
             onChanged: (v) => setState(() => _level = v!),
           ),
           const SizedBox(height: 14),
@@ -138,13 +156,17 @@ class _JobFormPageState extends State<JobFormPage> {
           ),
           const SizedBox(height: 14),
           DropdownButtonFormField<String>(
+            isExpanded: true,
             initialValue: _status,
             decoration: const InputDecoration(labelText: 'Status'),
-            items: [
-              'Active',
-              'Draft',
-              'Closed',
-            ].map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+            items: {_status, 'Active', 'Draft', 'Closed'}
+                .map(
+                  (v) => DropdownMenuItem(
+                    value: v,
+                    child: Text(v, overflow: TextOverflow.ellipsis),
+                  ),
+                )
+                .toList(),
             onChanged: (v) => setState(() => _status = v!),
           ),
           const SizedBox(height: 26),
@@ -168,18 +190,6 @@ class _JobFormPageState extends State<JobFormPage> {
             required: false,
           ),
           const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: _saving ? null : _save,
-            child: _saving
-                ? const SizedBox.square(
-                    dimension: 22,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2.4,
-                    ),
-                  )
-                : Text(widget.job == null ? 'Publish Job' : 'Save Changes'),
-          ),
           const SizedBox(height: 20),
         ],
       ),

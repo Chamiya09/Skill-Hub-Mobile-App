@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/dashboard_stats.dart';
+import '../../widgets/hr_mobile_ui.dart';
 import '../../services/dashboard_service.dart';
 
 class OverviewPage extends StatefulWidget {
@@ -68,13 +69,7 @@ class _OverviewPageState extends State<OverviewPage> {
           ],
           _OverviewHeader(companyName: data.companyName),
           const SizedBox(height: 16),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.18,
+          HrResponsiveTiles(
             children: [
               _MetricCard(
                 'Active Vacancies',
@@ -233,7 +228,7 @@ class _MetricCard extends StatelessWidget {
             ),
           ],
         ),
-        const Spacer(),
+        const SizedBox(height: 16),
         Text(
           '$value',
           style: TextStyle(
@@ -244,8 +239,6 @@ class _MetricCard extends StatelessWidget {
         ),
         Text(
           note,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             color: accent ? const Color(0xFF059669) : const Color(0xFF64748B),
             fontSize: 10,
@@ -302,8 +295,6 @@ class _TopMatches extends StatelessWidget {
                         children: [
                           Text(
                             match.candidateName,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Color(0xFF0F172A),
                               fontWeight: FontWeight.w700,
@@ -312,8 +303,6 @@ class _TopMatches extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             match.jobTitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                               color: Color(0xFF64748B),
                               fontSize: 11,
@@ -335,7 +324,6 @@ class _TopMatches extends StatelessWidget {
 class _VacancyMetrics extends StatelessWidget {
   const _VacancyMetrics({required this.vacancies});
   final List<VacancyMetric> vacancies;
-
   @override
   Widget build(BuildContext context) => _Panel(
     title: 'Active Job Vacancies',
@@ -347,35 +335,38 @@ class _VacancyMetrics extends StatelessWidget {
               final vacancy = entry.value;
               return _ListDivider(
                 last: entry.key == vacancies.length - 1,
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            vacancy.title,
-                            style: const TextStyle(
-                              color: Color(0xFF0F172A),
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            vacancy.department,
-                            style: const TextStyle(
-                              color: Color(0xFF94A3B8),
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
+                    Text(
+                      vacancy.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    _Count(label: 'Applicants', value: vacancy.applicantsCount),
-                    const SizedBox(width: 15),
-                    _Count(
-                      label: 'AI screened',
-                      value: vacancy.aiScreenedCount,
+                    const SizedBox(height: 4),
+                    Text(
+                      vacancy.department,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Wrap(
+                      spacing: 24,
+                      runSpacing: 12,
+                      children: [
+                        _Count(
+                          label: 'Applicants',
+                          value: vacancy.applicantsCount,
+                        ),
+                        _Count(
+                          label: 'AI screened',
+                          value: vacancy.aiScreenedCount,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -531,52 +522,30 @@ class _Panel extends StatelessWidget {
     required this.child,
     this.trailing,
   });
-  final String title;
-  final String subtitle;
+  final String title, subtitle;
   final Widget child;
   final Widget? trailing;
   @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFE2E8F0)),
-    ),
+  Widget build(BuildContext context) => HrCard(
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Color(0xFF0F172A),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontSize: 11,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ?trailing,
-            ],
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
           ),
         ),
-        const Divider(height: 1, color: Color(0xFFF1F5F9)),
-        Padding(padding: const EdgeInsets.all(16), child: child),
+        const SizedBox(height: 4),
+        Text(
+          subtitle,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+        ),
+        if (trailing != null) ...[const SizedBox(height: 8), trailing!],
+        const Divider(height: 28, color: Color(0xFFF1F5F9)),
+        child,
       ],
     ),
   );

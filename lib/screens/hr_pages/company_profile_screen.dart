@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../widgets/hr_mobile_ui.dart';
+
 import '../../models/company_profile.dart';
 import '../../services/company_account_service.dart';
 
@@ -29,14 +31,15 @@ const _companySizes = [
 ];
 
 class CompanyProfileScreen extends StatefulWidget {
-  const CompanyProfileScreen({super.key});
+  const CompanyProfileScreen({super.key, this.service});
+  final CompanyAccountService? service;
 
   @override
   State<CompanyProfileScreen> createState() => _CompanyProfileScreenState();
 }
 
 class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
-  final _service = CompanyAccountService();
+  late final _service = widget.service ?? CompanyAccountService();
   CompanyProfile? _profile;
   bool _loading = true;
   String? _error;
@@ -65,11 +68,8 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
   Future<void> _openEditor() async {
     final profile = _profile;
     if (profile == null) return;
-    final updated = await showModalBottomSheet<CompanyProfile>(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      backgroundColor: Colors.transparent,
+    final updated = await showHrSheet<CompanyProfile>(
+      context,
       builder: (_) =>
           _CompanyProfileEditor(profile: profile, service: _service),
     );
@@ -279,125 +279,115 @@ class _CompanyProfileEditorState extends State<_CompanyProfileEditor> {
   }
 
   @override
-  Widget build(BuildContext context) => FractionallySizedBox(
-    heightFactor: .82,
-    child: Material(
-      color: const Color(0xFFF8FAFC),
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          const _SheetHeader(
-            title: 'Edit Company Profile',
-            subtitle: 'Update your public identity and account details',
-          ),
-          Expanded(
-            child: Form(
-              key: _key,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_error != null) ...[
-                      _InlineError(_error!),
-                      const SizedBox(height: 14),
-                    ],
-                    const _FormSectionTitle('Organization'),
-                    _field(
-                      'companyName',
-                      'Company name',
-                      Icons.business_rounded,
-                      required: true,
-                    ),
-                    _dropdown(
-                      'Industry / sector',
-                      _industry,
-                      _industries,
-                      (value) => setState(() => _industry = value ?? ''),
-                    ),
-                    _dropdown(
-                      'Company size',
-                      _companySize,
-                      _companySizes,
-                      (value) => setState(() => _companySize = value ?? ''),
-                    ),
-                    _field(
-                      'foundedYear',
-                      'Founded year',
-                      Icons.calendar_today_outlined,
-                      keyboard: TextInputType.number,
-                    ),
-                    _field(
-                      'location',
-                      'Headquarters location',
-                      Icons.location_on_outlined,
-                    ),
-                    const _FormSectionTitle('Account representative'),
-                    _field(
-                      'adminName',
-                      'Administrator / representative',
-                      Icons.person_outline_rounded,
-                      required: true,
-                    ),
-                    _field(
-                      'contactEmail',
-                      'Official contact email',
-                      Icons.mail_outline_rounded,
-                      required: true,
-                      email: true,
-                      keyboard: TextInputType.emailAddress,
-                    ),
-                    _field(
-                      'phone',
-                      'Direct phone number',
-                      Icons.phone_outlined,
-                      keyboard: TextInputType.phone,
-                    ),
-                    const _FormSectionTitle('Digital presence'),
-                    _field(
-                      'logoUrl',
-                      'Company logo URL',
-                      Icons.image_outlined,
-                      keyboard: TextInputType.url,
-                    ),
-                    _field(
-                      'website',
-                      'Company website',
-                      Icons.language_rounded,
-                      keyboard: TextInputType.url,
-                    ),
-                    _field(
-                      'linkedinUrl',
-                      'LinkedIn URL',
-                      Icons.link_rounded,
-                      keyboard: TextInputType.url,
-                    ),
-                    _field(
-                      'twitterUrl',
-                      'X / Twitter URL',
-                      Icons.alternate_email_rounded,
-                      keyboard: TextInputType.url,
-                    ),
-                    _field(
-                      'githubUrl',
-                      'GitHub URL',
-                      Icons.code_rounded,
-                      keyboard: TextInputType.url,
-                    ),
-                    _field(
-                      'about',
-                      'About the company',
-                      Icons.article_outlined,
-                      lines: 5,
-                    ),
-                  ],
-                ),
-              ),
+  Widget build(BuildContext context) => HrSheet(
+    title: 'Edit Company Profile',
+    busy: _saving,
+    footer: HrSaveButton(
+      label: 'Save Changes',
+      busy: _saving,
+      onPressed: _save,
+    ),
+    body: Form(
+      key: _key,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_error != null) ...[
+              _InlineError(_error!),
+              const SizedBox(height: 14),
+            ],
+            const _FormSectionTitle('Organization'),
+            _field(
+              'companyName',
+              'Company name',
+              Icons.business_rounded,
+              required: true,
             ),
-          ),
-          _StickySaveBar(saving: _saving, label: 'Save Changes', onSave: _save),
-        ],
+            _dropdown(
+              'Industry / sector',
+              _industry,
+              _industries,
+              (value) => setState(() => _industry = value ?? ''),
+            ),
+            _dropdown(
+              'Company size',
+              _companySize,
+              _companySizes,
+              (value) => setState(() => _companySize = value ?? ''),
+            ),
+            _field(
+              'foundedYear',
+              'Founded year',
+              Icons.calendar_today_outlined,
+              keyboard: TextInputType.number,
+            ),
+            _field(
+              'location',
+              'Headquarters location',
+              Icons.location_on_outlined,
+            ),
+            const _FormSectionTitle('Account representative'),
+            _field(
+              'adminName',
+              'Administrator / representative',
+              Icons.person_outline_rounded,
+              required: true,
+            ),
+            _field(
+              'contactEmail',
+              'Official contact email',
+              Icons.mail_outline_rounded,
+              required: true,
+              email: true,
+              keyboard: TextInputType.emailAddress,
+            ),
+            _field(
+              'phone',
+              'Direct phone number',
+              Icons.phone_outlined,
+              keyboard: TextInputType.phone,
+            ),
+            const _FormSectionTitle('Digital presence'),
+            _field(
+              'logoUrl',
+              'Company logo URL',
+              Icons.image_outlined,
+              keyboard: TextInputType.url,
+            ),
+            _field(
+              'website',
+              'Company website',
+              Icons.language_rounded,
+              keyboard: TextInputType.url,
+            ),
+            _field(
+              'linkedinUrl',
+              'LinkedIn URL',
+              Icons.link_rounded,
+              keyboard: TextInputType.url,
+            ),
+            _field(
+              'twitterUrl',
+              'X / Twitter URL',
+              Icons.alternate_email_rounded,
+              keyboard: TextInputType.url,
+            ),
+            _field(
+              'githubUrl',
+              'GitHub URL',
+              Icons.code_rounded,
+              keyboard: TextInputType.url,
+            ),
+            _field(
+              'about',
+              'About the company',
+              Icons.article_outlined,
+              lines: 5,
+            ),
+          ],
+        ),
       ),
     ),
   );
@@ -443,13 +433,13 @@ class _CompanyProfileEditorState extends State<_CompanyProfileEditor> {
     padding: const EdgeInsets.only(bottom: 14),
     child: DropdownButtonFormField<String>(
       key: ValueKey('$label$value'),
-      initialValue: values.contains(value) ? value : null,
+      initialValue: value.isEmpty ? null : value,
       isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: const Icon(Icons.keyboard_arrow_down_rounded),
       ),
-      items: values
+      items: {...values, if (value.isNotEmpty) value}
           .map(
             (item) => DropdownMenuItem(
               value: item,
@@ -542,7 +532,7 @@ class _CompanyHero extends StatelessWidget {
                       profile.location,
                       style: const TextStyle(
                         color: Color(0xFF64748B),
-                        fontSize: 10,
+                        fontSize: 12,
                       ),
                     ),
                   ],
@@ -566,46 +556,19 @@ class _DetailsCard extends StatelessWidget {
   final String title;
   final List<Widget> children;
   @override
-  Widget build(BuildContext context) => Card(
-    elevation: 1.5,
-    shadowColor: const Color(0x120F172A),
-    margin: EdgeInsets.zero,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(17),
-      side: const BorderSide(color: Color(0xFFE2E8F0)),
-    ),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: const Color(0xFF059669), size: 19),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    color: Color(0xFF0F172A),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          ...children,
-        ],
+  Widget build(BuildContext context) => HrCard(
+    padding: EdgeInsets.zero,
+    child: ExpansionTile(
+      key: PageStorageKey('company-profile-$title'),
+      initiallyExpanded: true,
+      leading: Icon(icon, color: hrEmerald),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
       ),
+      tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+      children: children,
     ),
   );
 }
@@ -641,7 +604,7 @@ class _DetailRow extends StatelessWidget {
                 label.toUpperCase(),
                 style: const TextStyle(
                   color: Color(0xFF94A3B8),
-                  fontSize: 9,
+                  fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: .4,
                 ),
@@ -689,12 +652,14 @@ class _AboutCard extends StatelessWidget {
             children: [
               Icon(Icons.article_outlined, color: Color(0xFF059669), size: 20),
               SizedBox(width: 9),
-              Text(
-                'About the Company',
-                style: TextStyle(
-                  color: Color(0xFF0F172A),
-                  fontSize: 15,
-                  fontWeight: FontWeight.w800,
+              Expanded(
+                child: Text(
+                  'About the Company',
+                  style: TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             ],
@@ -709,102 +674,6 @@ class _AboutCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    ),
-  );
-}
-
-class _SheetHeader extends StatelessWidget {
-  const _SheetHeader({required this.title, required this.subtitle});
-  final String title, subtitle;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(20, 10, 12, 14),
-    color: Colors.white,
-    child: Column(
-      children: [
-        Container(
-          width: 42,
-          height: 4,
-          decoration: BoxDecoration(
-            color: const Color(0xFFCBD5E1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Color(0xFF0F172A),
-                      fontSize: 19,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            IconButton(
-              tooltip: 'Close',
-              onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close_rounded),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
-class _StickySaveBar extends StatelessWidget {
-  const _StickySaveBar({
-    required this.saving,
-    required this.label,
-    required this.onSave,
-  });
-  final bool saving;
-  final String label;
-  final VoidCallback onSave;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-      boxShadow: [
-        BoxShadow(
-          color: Color(0x100F172A),
-          blurRadius: 12,
-          offset: Offset(0, -4),
-        ),
-      ],
-    ),
-    child: SafeArea(
-      top: false,
-      child: ElevatedButton.icon(
-        onPressed: saving ? null : onSave,
-        icon: saving
-            ? const SizedBox.square(
-                dimension: 19,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Icon(Icons.save_outlined),
-        label: Text(saving ? 'Saving...' : label),
       ),
     ),
   );
@@ -827,12 +696,14 @@ class _FormSectionTitle extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF0F172A),
-            fontSize: 14,
-            fontWeight: FontWeight.w800,
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFF0F172A),
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ),
       ],

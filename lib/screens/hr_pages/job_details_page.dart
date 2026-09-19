@@ -1,38 +1,25 @@
 import 'package:flutter/material.dart';
 
 import '../../models/job_vacancy.dart';
+import '../../widgets/hr_mobile_ui.dart';
 
 class JobDetailsPage extends StatelessWidget {
   const JobDetailsPage({super.key, required this.job});
   final JobVacancy job;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: const Color(0xFFF8FAFC),
-    appBar: AppBar(
-      backgroundColor: Colors.white,
-      surfaceTintColor: Colors.white,
-      title: const Text(
-        'Job Details',
-        style: TextStyle(
-          color: Color(0xFF0F172A),
-          fontSize: 18,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
+  Widget build(BuildContext context) => HrSheet(
+    title: 'Job Details',
+    footer: HrSaveButton(
+      label: 'Done',
+      onPressed: () => Navigator.pop(context),
     ),
     body: ListView(
       padding: const EdgeInsets.all(18),
       children: [
         _Hero(job),
         const SizedBox(height: 14),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 1.65,
+        HrResponsiveTiles(
           children: [
             _Spec(
               Icons.payments_outlined,
@@ -282,36 +269,19 @@ class _Section extends StatelessWidget {
   final String title;
   final Widget child;
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFE2E8F0)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, color: const Color(0xFF10B981), size: 20),
-            const SizedBox(width: 9),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Color(0xFF0F172A),
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 13),
-          child: Divider(height: 1, color: Color(0xFFF1F5F9)),
-        ),
-        child,
-      ],
+  Widget build(BuildContext context) => HrCard(
+    padding: EdgeInsets.zero,
+    child: ExpansionTile(
+      key: PageStorageKey('job-details-$title'),
+      initiallyExpanded: true,
+      tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      leading: Icon(icon, color: hrEmerald),
+      title: Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      ),
+      children: [child],
     ),
   );
 }
@@ -349,14 +319,12 @@ class _Spec extends StatelessWidget {
                 label,
                 style: const TextStyle(
                   color: Color(0xFF64748B),
-                  fontSize: 8,
+                  fontSize: 11,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               Text(
                 value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
                   color: Color(0xFF0F172A),
                   fontSize: 11,
@@ -403,9 +371,11 @@ class _Meta extends StatelessWidget {
     children: [
       Icon(icon, size: 16, color: const Color(0xFF64748B)),
       const SizedBox(width: 5),
-      Text(
-        text,
-        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+      Flexible(
+        child: Text(
+          text,
+          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+        ),
       ),
     ],
   );
@@ -416,32 +386,8 @@ class _Info extends StatelessWidget {
   final String label, value;
   final bool last;
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(vertical: 11),
-    decoration: BoxDecoration(
-      border: last
-          ? null
-          : const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
-    ),
-    child: Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Color(0xFF0F172A),
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    ),
-  );
+  Widget build(BuildContext context) =>
+      Align(alignment: Alignment.centerLeft, child: HrDetail(label, value));
 }
 
 String _date(DateTime? date) {

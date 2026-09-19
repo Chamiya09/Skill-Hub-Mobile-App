@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/job_vacancy.dart';
+import '../../widgets/hr_mobile_ui.dart';
 import '../../models/pipeline_candidate.dart';
 import '../../services/ai_pipeline_service.dart';
 import '../../services/jobs_service.dart';
@@ -8,14 +9,20 @@ import '../../services/jobs_service.dart';
 enum _PipelineView { screening, shortlist }
 
 class ScreeningPipelinePage extends StatefulWidget {
-  const ScreeningPipelinePage({super.key});
+  const ScreeningPipelinePage({
+    super.key,
+    this.jobsService,
+    this.pipelineService,
+  });
+  final JobsService? jobsService;
+  final AiPipelineService? pipelineService;
   @override
   State<ScreeningPipelinePage> createState() => _ScreeningPipelinePageState();
 }
 
 class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
-  final _jobsService = JobsService();
-  final _pipelineService = AiPipelineService();
+  late final _jobsService = widget.jobsService ?? JobsService();
+  late final _pipelineService = widget.pipelineService ?? AiPipelineService();
   final _search = TextEditingController();
   List<JobVacancy> _jobs = const [];
   List<PipelineCandidate> _candidates = const [];
@@ -25,6 +32,8 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
   bool _loading = true;
   bool _working = false;
   String? _error;
+  String _quickFilter = 'All';
+  int _request = 0;
 
   @override
   void initState() {
@@ -55,7 +64,12 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
       if (!mounted) return;
       setState(() {
         _jobs = published;
-        _job = published.isEmpty ? null : published.first;
+        _job = published.isEmpty
+            ? null
+            : published.firstWhere(
+                (job) => job.id == _job?.id,
+                orElse: () => published.first,
+              );
       });
       await _loadCandidates();
     } on JobsException catch (error) {
@@ -71,20 +85,27 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
       if (mounted) setState(() => _candidates = const []);
       return;
     }
+    final request = ++_request;
+    final view = _view;
     setState(() {
       _loading = true;
       _error = null;
       _selected.clear();
+      _candidates = const [];
     });
     try {
-      final candidates = _view == _PipelineView.screening
+      final candidates = view == _PipelineView.screening
           ? await _pipelineService.getRankedApplicants(job.id)
           : await _pipelineService.getShortlisted(job.id);
-      if (mounted) setState(() => _candidates = candidates);
+      if (mounted && request == _request) {
+        setState(() => _candidates = candidates);
+      }
     } on AiPipelineException catch (error) {
-      if (mounted) setState(() => _error = error.message);
+      if (mounted && request == _request) {
+        setState(() => _error = error.message);
+      }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && request == _request) setState(() => _loading = false);
     }
   }
 
@@ -118,6 +139,38 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
     }
   }
 
+  Future<void> _confirmShortlist() async {
+    final selected = _candidates
+        .where((candidate) => _selected.contains(candidate.candidateId))
+        .toList();
+    if (selected.isEmpty) return;
+    final confirmed = await showHrSheet<bool>(
+      context,
+      builder: (context) => HrSheet(
+        title: 'Review shortlist',
+        subtitle: '${selected.length} candidates will advance in the pipeline.',
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: selected
+              .map(
+                (candidate) => Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: HrCard(
+                    child: HrDetail(candidate.name, candidate.headline),
+                  ),
+                ),
+              )
+              .toList(),
+        ),
+        footer: HrSaveButton(
+          label: 'Confirm shortlist',
+          onPressed: () => Navigator.pop(context, true),
+        ),
+      ),
+    );
+    if (confirmed == true && mounted) await _shortlistSelected();
+  }
+
   Future<void> _shortlistSelected() async {
     final job = _job;
     if (job == null || _selected.isEmpty) return;
@@ -128,6 +181,7 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
       final count = _selected.length;
       _selected.clear();
       await _loadCandidates();
+      if (!mounted) return;
       _showMessage(
         '$count candidate${count == 1 ? '' : 's'} moved to shortlist.',
       );
@@ -136,6 +190,91 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
     } finally {
       if (mounted) setState(() => _working = false);
     }
+  }
+
+  Future<void> _chooseCandidates() async {
+    final eligible = _candidates
+        .where((candidate) => candidate.status.toLowerCase() == 'applied')
+        .toList();
+    final selection = await showHrSheet<Set<String>>(
+      context,
+      builder: (_) =>
+          _CandidateSelection(candidates: eligible, selected: _selected),
+    );
+    if (selection != null && mounted) {
+      setState(() {
+        _selected
+          ..clear()
+          ..addAll(selection);
+      });
+    }
+  }
+
+  void _viewCandidate(PipelineCandidate candidate) {
+    showHrSheet<void>(
+      context,
+      builder: (context) => HrSheet(
+        title: 'Candidate Details',
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            HrCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  HrDetail('Full name', candidate.name),
+                  HrDetail('Headline', candidate.headline),
+                  HrDetail('Email', candidate.email),
+                  HrDetail('Location', candidate.location),
+                  HrDetail('Application status', candidate.status),
+                  HrDetail(
+                    'AI match score',
+                    candidate.aiScore == null
+                        ? 'Not scored yet'
+                        : '${candidate.aiScore}%',
+                  ),
+                  HrDetail(
+                    'Applied / shortlisted',
+                    candidate.appliedAt
+                            ?.toLocal()
+                            .toString()
+                            .split('.')
+                            .first ??
+                        'Not available',
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            HrCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Skills',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  if (candidate.skills.isEmpty)
+                    const Text('No skills provided'),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: candidate.skills
+                        .map((skill) => Chip(label: Text(skill)))
+                        .toList(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        footer: HrSaveButton(
+          label: 'Done',
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+    );
   }
 
   void _showMessage(String message) {
@@ -150,13 +289,17 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
     final visible = _candidates
         .where(
           (candidate) =>
-              query.isEmpty ||
-              candidate.name.toLowerCase().contains(query) ||
-              candidate.headline.toLowerCase().contains(query) ||
-              candidate.location.toLowerCase().contains(query) ||
-              candidate.skills.any(
-                (skill) => skill.toLowerCase().contains(query),
-              ),
+              (query.isEmpty ||
+                  candidate.name.toLowerCase().contains(query) ||
+                  candidate.headline.toLowerCase().contains(query) ||
+                  candidate.location.toLowerCase().contains(query) ||
+                  candidate.skills.any(
+                    (skill) => skill.toLowerCase().contains(query),
+                  )) &&
+              (_quickFilter != '80%+ match' ||
+                  (candidate.aiScore ?? 0) >= 80) &&
+              (_quickFilter != 'Selected' ||
+                  _selected.contains(candidate.candidateId)),
         )
         .toList();
     final screened = _candidates
@@ -168,7 +311,9 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
 
     return RefreshIndicator(
       color: const Color(0xFF10B981),
-      onRefresh: _loadCandidates,
+      onRefresh: () async {
+        if (!_working) await _loadJobs();
+      },
       child: ListView(
         key: const PageStorageKey('screening-pipeline-page'),
         physics: const AlwaysScrollableScrollPhysics(),
@@ -179,10 +324,13 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
           _JobSelector(
             jobs: _jobs,
             selected: _job,
-            onChanged: _working ? null : _changeJob,
+            onChanged: _working || _loading ? null : _changeJob,
           ),
           const SizedBox(height: 14),
-          _ViewTabs(view: _view, onChanged: _working ? null : _changeView),
+          _ViewTabs(
+            view: _view,
+            onChanged: _working || _loading ? null : _changeView,
+          ),
           const SizedBox(height: 14),
           _MetricsRow(
             applicants: _candidates.length,
@@ -191,16 +339,20 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
           ),
           if (_error != null) ...[
             const SizedBox(height: 14),
-            _ErrorCard(message: _error!, onRetry: _loadCandidates),
+            _ErrorCard(
+              message: _error!,
+              onRetry: _job == null ? _loadJobs : _loadCandidates,
+            ),
           ],
           const SizedBox(height: 14),
           _ActionPanel(
             view: _view,
             job: _job,
             selectedCount: _selected.length,
-            working: _working,
+            working: _working || _loading,
+            onChoose: _chooseCandidates,
             onRunScreening: _runScreening,
-            onShortlist: _shortlistSelected,
+            onShortlist: _confirmShortlist,
           ),
           const SizedBox(height: 14),
           TextField(
@@ -218,6 +370,24 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
                       onPressed: _search.clear,
                       icon: const Icon(Icons.close_rounded),
                     ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                ...['All', '80%+ match', 'Selected'].map(
+                  (filter) => Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(filter),
+                      selected: _quickFilter == filter,
+                      onSelected: (_) => setState(() => _quickFilter = filter),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 12),
@@ -241,13 +411,13 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
               icon: _view == _PipelineView.screening
                   ? Icons.auto_awesome_outlined
                   : Icons.people_outline_rounded,
-              title: query.isNotEmpty
+              title: query.isNotEmpty || _quickFilter != 'All'
                   ? 'No matching candidates'
                   : _view == _PipelineView.screening
                   ? 'No applicants to screen'
                   : 'No shortlisted candidates',
-              message: query.isNotEmpty
-                  ? 'Try a different name, location, or skill.'
+              message: query.isNotEmpty || _quickFilter != 'All'
+                  ? 'Try another filter, name, location, or skill.'
                   : _view == _PipelineView.screening
                   ? 'Applications for this vacancy will appear here.'
                   : 'Select candidates from AI Screening to build this shortlist.',
@@ -257,17 +427,11 @@ class _ScreeningPipelinePageState extends State<ScreeningPipelinePage> {
               (entry) => Padding(
                 padding: const EdgeInsets.only(bottom: 11),
                 child: _CandidateCard(
+                  key: ValueKey(entry.value.candidateId),
                   candidate: entry.value,
-                  rank: entry.key + 1,
-                  selectable:
-                      _view == _PipelineView.screening &&
-                      entry.value.status.toLowerCase() != 'shortlisted',
+                  rank: _candidates.indexOf(entry.value) + 1,
                   selected: _selected.contains(entry.value.candidateId),
-                  onSelected: (selected) => setState(() {
-                    selected
-                        ? _selected.add(entry.value.candidateId)
-                        : _selected.remove(entry.value.candidateId);
-                  }),
+                  onView: () => _viewCandidate(entry.value),
                 ),
               ),
             ),
@@ -390,19 +554,11 @@ class _MetricsRow extends StatelessWidget {
   });
   final int applicants, screened, highMatches;
   @override
-  Widget build(BuildContext context) => Row(
+  Widget build(BuildContext context) => HrResponsiveTiles(
     children: [
-      Expanded(
-        child: _Metric(value: applicants, label: 'Candidates'),
-      ),
-      const SizedBox(width: 8),
-      Expanded(
-        child: _Metric(value: screened, label: 'AI scored'),
-      ),
-      const SizedBox(width: 8),
-      Expanded(
-        child: _Metric(value: highMatches, label: '80%+ match'),
-      ),
+      _Metric(value: applicants, label: 'Candidates'),
+      _Metric(value: screened, label: 'AI scored'),
+      _Metric(value: highMatches, label: '80%+ match'),
     ],
   );
 }
@@ -432,7 +588,6 @@ class _Metric extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          maxLines: 1,
           style: const TextStyle(
             color: Color(0xFF64748B),
             fontSize: 9,
@@ -452,67 +607,89 @@ class _ActionPanel extends StatelessWidget {
     required this.working,
     required this.onRunScreening,
     required this.onShortlist,
+    required this.onChoose,
   });
   final _PipelineView view;
   final JobVacancy? job;
   final int selectedCount;
   final bool working;
-  final VoidCallback onRunScreening, onShortlist;
+  final VoidCallback onRunScreening, onShortlist, onChoose;
+
   @override
   Widget build(BuildContext context) {
     final closed = job?.status.toLowerCase() == 'closed';
     final screening = view == _PipelineView.screening;
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: screening ? const Color(0xFFECFDF5) : const Color(0xFFF8FAFC),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: screening ? const Color(0xFFA7F3D0) : const Color(0xFFE2E8F0),
-        ),
-      ),
-      child: Row(
+    return HrCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            screening ? Icons.bolt_rounded : Icons.route_rounded,
-            color: const Color(0xFF059669),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              screening
-                  ? closed
-                        ? 'Vacancy closed and ready for AI ranking.'
-                        : 'Review applicants. Close the vacancy before refreshing AI scores.'
-                  : 'Candidates advanced from AI screening appear here.',
-              style: const TextStyle(
-                color: Color(0xFF475569),
-                fontSize: 11,
-                height: 1.4,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                screening ? Icons.auto_awesome_rounded : Icons.route_rounded,
+                color: hrEmerald,
               ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  screening
+                      ? closed
+                            ? 'Ready for AI ranking'
+                            : 'Applications are open'
+                      : 'Hiring shortlist',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            screening
+                ? closed
+                      ? 'Review ranked profiles and choose candidates to advance.'
+                      : 'Review applicants. Close this vacancy in Jobs before refreshing AI scores.'
+                : 'Candidates advanced from AI screening appear here.',
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 13,
+              height: 1.5,
             ),
           ),
-          if (screening && selectedCount > 0)
-            FilledButton(
-              onPressed: working ? null : onShortlist,
-              child: Text('Shortlist $selectedCount'),
-            )
-          else if (screening)
-            IconButton.filled(
-              tooltip: closed
-                  ? 'Run AI screening'
-                  : 'Close vacancy to refresh screening',
-              onPressed: working || !closed ? null : onRunScreening,
-              icon: working
-                  ? const SizedBox.square(
-                      dimension: 17,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Icon(Icons.auto_awesome_rounded),
+          if (screening) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: working || job == null ? null : onChoose,
+                  icon: const Icon(Icons.people_outline_rounded),
+                  label: Text(
+                    selectedCount == 0
+                        ? 'Select candidates'
+                        : '$selectedCount selected',
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed: working || !closed ? null : onRunScreening,
+                  icon: const Icon(Icons.auto_awesome_rounded),
+                  label: const Text('Run AI screening'),
+                ),
+              ],
             ),
+            if (selectedCount > 0) ...[
+              const SizedBox(height: 12),
+              HrSaveButton(
+                label: 'Move $selectedCount to shortlist',
+                busy: working,
+                onPressed: onShortlist,
+              ),
+            ],
+          ],
         ],
       ),
     );
@@ -521,16 +698,17 @@ class _ActionPanel extends StatelessWidget {
 
 class _CandidateCard extends StatelessWidget {
   const _CandidateCard({
+    super.key,
     required this.candidate,
     required this.rank,
-    required this.selectable,
     required this.selected,
-    required this.onSelected,
+    required this.onView,
   });
   final PipelineCandidate candidate;
   final int rank;
-  final bool selectable, selected;
-  final ValueChanged<bool> onSelected;
+  final bool selected;
+  final VoidCallback onView;
+
   @override
   Widget build(BuildContext context) {
     final initials = candidate.name
@@ -539,167 +717,219 @@ class _CandidateCard extends StatelessWidget {
         .take(2)
         .map((part) => part[0].toUpperCase())
         .join();
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: selectable ? () => onSelected(!selected) : null,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: selected
-                  ? const Color(0xFF10B981)
-                  : const Color(0xFFE2E8F0),
-              width: selected ? 1.5 : 1,
-            ),
-          ),
-          child: Column(
+    return HrCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CircleAvatar(
-                    radius: 23,
-                    backgroundColor: const Color(0xFFD1FAE5),
-                    child: Text(
-                      initials,
-                      style: const TextStyle(
-                        color: Color(0xFF047857),
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 11),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                candidate.name,
-                                style: const TextStyle(
-                                  color: Color(0xFF0F172A),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                            if (candidate.aiScore != null)
-                              _ScoreBadge(score: candidate.aiScore!),
-                          ],
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          candidate.headline,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Color(0xFF475569),
-                            fontSize: 11,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.location_on_outlined,
-                              size: 13,
-                              color: Color(0xFF94A3B8),
-                            ),
-                            const SizedBox(width: 3),
-                            Expanded(
-                              child: Text(
-                                candidate.location,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color(0xFF64748B),
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (selectable) ...[
-                    const SizedBox(width: 6),
-                    Checkbox(
-                      value: selected,
-                      onChanged: (value) => onSelected(value ?? false),
-                    ),
-                  ] else
-                    Container(
-                      margin: const EdgeInsets.only(left: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFECFDF5),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Shortlisted',
-                        style: TextStyle(
-                          color: Color(0xFF047857),
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-              if (candidate.skills.isNotEmpty) ...[
-                const Divider(height: 22, color: Color(0xFFF1F5F9)),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    children: candidate.skills
-                        .take(4)
-                        .map(
-                          (skill) => Chip(
-                            label: Text(skill),
-                            visualDensity: VisualDensity.compact,
-                          ),
-                        )
-                        .toList(),
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: const Color(0xFFD1FAE5),
+                child: Text(
+                  initials,
+                  style: const TextStyle(
+                    color: Color(0xFF047857),
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-              ],
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Text(
-                    '#$rank',
-                    style: const TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      candidate.name,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    candidate.status,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w700,
+                    const SizedBox(height: 4),
+                    Text(
+                      candidate.headline,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF64748B),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
-        ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Text(
+                '#$rank',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              if (candidate.aiScore != null)
+                _ScoreBadge(score: candidate.aiScore!)
+              else
+                const Text('Not scored yet'),
+              Chip(label: Text(candidate.status)),
+              if (selected)
+                const Chip(
+                  avatar: Icon(
+                    Icons.check_circle_rounded,
+                    color: hrEmerald,
+                    size: 18,
+                  ),
+                  label: Text('Selected'),
+                ),
+            ],
+          ),
+          HrDetail('Location', candidate.location),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: candidate.skills
+                .take(4)
+                .map((skill) => Chip(label: Text(skill)))
+                .toList(),
+          ),
+          ExpansionTile(
+            key: PageStorageKey('candidate-details-${candidate.candidateId}'),
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 12),
+            title: const Text(
+              'Contact & additional details',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            ),
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    HrDetail('Email', candidate.email),
+                    HrDetail(
+                      'Applied / shortlisted',
+                      candidate.appliedAt
+                              ?.toLocal()
+                              .toString()
+                              .split('.')
+                              .first ??
+                          'Not available',
+                    ),
+                    if (candidate.skills.length > 4)
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: candidate.skills
+                            .skip(4)
+                            .map((skill) => Chip(label: Text(skill)))
+                            .toList(),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onView,
+              icon: const Icon(Icons.person_outline_rounded),
+              label: const Text('View Details'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CandidateSelection extends StatefulWidget {
+  const _CandidateSelection({required this.candidates, required this.selected});
+  final List<PipelineCandidate> candidates;
+  final Set<String> selected;
+  @override
+  State<_CandidateSelection> createState() => _CandidateSelectionState();
+}
+
+class _CandidateSelectionState extends State<_CandidateSelection> {
+  late final Set<String> _draft = {...widget.selected};
+  String _query = '';
+  @override
+  Widget build(BuildContext context) {
+    final visible = widget.candidates
+        .where(
+          (candidate) =>
+              candidate.name.toLowerCase().contains(_query) ||
+              candidate.skills.any(
+                (skill) => skill.toLowerCase().contains(_query),
+              ),
+        )
+        .toList();
+    return HrSheet(
+      title: 'Select candidates',
+      subtitle: '${_draft.length} selected for shortlisting',
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          TextField(
+            onChanged: (value) =>
+                setState(() => _query = value.trim().toLowerCase()),
+            decoration: const InputDecoration(
+              labelText: 'Find candidates',
+              prefixIcon: Icon(Icons.search_rounded),
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () => setState(_draft.clear),
+            child: const Text('Clear selection'),
+          ),
+          if (visible.isEmpty)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Text('No eligible candidates match this search.'),
+            ),
+          ...visible.map(
+            (candidate) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: HrCard(
+                padding: EdgeInsets.zero,
+                child: CheckboxListTile(
+                  activeColor: hrEmerald,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  title: Text(
+                    candidate.name,
+                    style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  subtitle: Text(
+                    '${candidate.headline}\nAI match: ${candidate.aiScore == null ? 'Not scored' : '${candidate.aiScore}%'}',
+                  ),
+                  value: _draft.contains(candidate.candidateId),
+                  onChanged: (checked) => setState(() {
+                    checked == true
+                        ? _draft.add(candidate.candidateId)
+                        : _draft.remove(candidate.candidateId);
+                  }),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      footer: HrSaveButton(
+        label: 'Apply Selection',
+        onPressed: () => Navigator.pop(context, _draft),
       ),
     );
   }

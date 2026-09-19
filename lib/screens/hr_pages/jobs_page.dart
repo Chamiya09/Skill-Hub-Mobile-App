@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
 import '../../models/job_vacancy.dart';
+import '../../widgets/hr_mobile_ui.dart';
 import '../../services/jobs_service.dart';
 import 'job_details_page.dart';
 import 'job_form_page.dart';
 
 class JobsPage extends StatefulWidget {
-  const JobsPage({super.key});
+  const JobsPage({super.key, this.service});
+  final JobsService? service;
   @override
   State<JobsPage> createState() => _JobsPageState();
 }
 
 class _JobsPageState extends State<JobsPage> {
-  final _service = JobsService();
+  late final _service = widget.service ?? JobsService();
   final _search = TextEditingController();
   List<JobVacancy> _jobs = const [];
   bool _loading = true;
@@ -37,40 +39,48 @@ class _JobsPageState extends State<JobsPage> {
   void _changed() => setState(() {});
 
   Future<void> _openForm([JobVacancy? job]) async {
-    final saved = await Navigator.push<JobVacancy>(
+    final saved = await showHrSheet<JobVacancy>(
       context,
-      MaterialPageRoute(builder: (_) => JobFormPage(job: job)),
+      builder: (_) => JobFormPage(job: job),
     );
-    if (saved != null) {
+    if (saved != null && mounted) {
       await _load();
     }
   }
 
   Future<void> _delete(JobVacancy job) async {
-    final yes = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: const Icon(
-          Icons.delete_outline_rounded,
-          color: Color(0xFFDC2626),
-        ),
-        title: const Text('Delete Job Vacancy?'),
-        content: Text(
-          'Permanently delete “${job.title}”? This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFFDC2626),
+    final yes = await showHrSheet<bool>(
+      context,
+      builder: (context) => HrSheet(
+        title: 'Delete Job Vacancy?',
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            const Icon(
+              Icons.delete_outline_rounded,
+              color: Color(0xFFDC2626),
+              size: 48,
             ),
-            child: const Text('Delete'),
+            const SizedBox(height: 20),
+            Text(
+              'Permanently delete "${job.title}"? This cannot be undone.',
+              style: const TextStyle(fontSize: 16, height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Keep vacancy'),
+            ),
+          ],
+        ),
+        footer: ElevatedButton.icon(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFFDC2626),
           ),
-        ],
+          onPressed: () => Navigator.pop(context, true),
+          icon: const Icon(Icons.delete_outline_rounded),
+          label: const Text('Delete permanently'),
+        ),
       ),
     );
     if (yes != true) return;
@@ -95,6 +105,7 @@ class _JobsPageState extends State<JobsPage> {
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
@@ -125,7 +136,12 @@ class _JobsPageState extends State<JobsPage> {
         .toList();
     final departments = [
       'All',
-      ...(_jobs.map((j) => j.department).toSet().toList()..sort()),
+      ...(_jobs
+          .map((j) => j.department)
+          .where((value) => value.isNotEmpty && value != 'All')
+          .toSet()
+          .toList()
+        ..sort()),
     ];
     final active = _jobs
         .where((job) => job.status.toLowerCase() == 'active')
@@ -207,11 +223,9 @@ class _JobsPageState extends State<JobsPage> {
                   job: job,
                   onEdit: () => _openForm(job),
                   onDelete: () => _delete(job),
-                  onTap: () => Navigator.push(
+                  onTap: () => showHrSheet<void>(
                     context,
-                    MaterialPageRoute<void>(
-                      builder: (_) => JobDetailsPage(job: job),
-                    ),
+                    builder: (_) => JobDetailsPage(job: job),
                   ),
                 ),
               ),
@@ -311,103 +325,144 @@ class _FiltersPanel extends StatelessWidget {
     required this.onDepartmentChanged,
     required this.onClear,
   });
-
   final TextEditingController search;
-  final String query;
-  final String status;
-  final String department;
+  final String query, status, department;
   final List<String> departments;
   final bool hasFilters;
-  final ValueChanged<String> onStatusChanged;
-  final ValueChanged<String> onDepartmentChanged;
+  final ValueChanged<String> onStatusChanged, onDepartmentChanged;
   final VoidCallback onClear;
 
+  Future<void> _openFilters(BuildContext context) async {
+    var draftStatus = status;
+    var draftDepartment = department;
+    final applied = await showHrSheet<bool>(
+      context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDraft) => HrSheet(
+          title: 'Vacancy filters',
+          subtitle: 'Apply changes when you are ready',
+          body: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              const Text(
+                'Status',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: ['All', 'Active', 'Draft', 'Closed']
+                    .map(
+                      (value) => FilterChip(
+                        label: Text(value),
+                        selected: draftStatus == value,
+                        onSelected: (_) => setDraft(() => draftStatus = value),
+                      ),
+                    )
+                    .toList(),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Department',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                key: ValueKey(draftDepartment),
+                initialValue: draftDepartment,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  labelText: 'Department',
+                  prefixIcon: Icon(Icons.business_outlined),
+                ),
+                items: departments
+                    .toSet()
+                    .map(
+                      (value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(
+                          value == 'All' ? 'All departments' : value,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) =>
+                    setDraft(() => draftDepartment = value ?? 'All'),
+              ),
+              const SizedBox(height: 20),
+              TextButton.icon(
+                onPressed: () => setDraft(() {
+                  draftStatus = 'All';
+                  draftDepartment = 'All';
+                }),
+                icon: const Icon(Icons.restart_alt_rounded),
+                label: const Text('Reset filters'),
+              ),
+            ],
+          ),
+          footer: HrSaveButton(
+            label: 'Apply Filters',
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ),
+      ),
+    );
+    if (applied == true) {
+      onStatusChanged(draftStatus);
+      onDepartmentChanged(draftDepartment);
+    }
+  }
+
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFE2E8F0)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          controller: search,
-          textInputAction: TextInputAction.search,
-          decoration: InputDecoration(
-            hintText: 'Search title, department, or location',
-            prefixIcon: const Icon(Icons.search_rounded),
-            suffixIcon: query.isEmpty
-                ? null
-                : IconButton(
-                    tooltip: 'Clear search',
-                    onPressed: search.clear,
-                    icon: const Icon(Icons.close_rounded),
-                  ),
-          ),
+  Widget build(BuildContext context) => Column(
+    children: [
+      TextField(
+        controller: search,
+        textInputAction: TextInputAction.search,
+        decoration: InputDecoration(
+          labelText: 'Search vacancies',
+          hintText: 'Title, department or location',
+          prefixIcon: const Icon(Icons.search_rounded),
+          suffixIcon: query.isEmpty
+              ? null
+              : IconButton(
+                  tooltip: 'Clear search',
+                  onPressed: search.clear,
+                  icon: const Icon(Icons.close_rounded),
+                ),
         ),
-        const SizedBox(height: 14),
-        const Text(
-          'STATUS',
-          style: TextStyle(
-            color: Color(0xFF64748B),
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .7,
-          ),
-        ),
-        const SizedBox(height: 7),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: ['All', 'Active', 'Draft', 'Closed']
-              .map(
-                (value) => ChoiceChip(
+      ),
+      const SizedBox(height: 12),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ActionChip(
+                avatar: const Icon(Icons.tune_rounded, size: 18),
+                label: Text(department == 'All' ? 'Filters' : department),
+                onPressed: () => _openFilters(context),
+              ),
+            ),
+            ...['All', 'Active', 'Draft', 'Closed'].map(
+              (value) => Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: FilterChip(
                   label: Text(value),
                   selected: status == value,
-                  selectedColor: const Color(0xFFD1FAE5),
                   onSelected: (_) => onStatusChanged(value),
                 ),
-              )
-              .toList(),
-        ),
-        const SizedBox(height: 12),
-        DropdownButtonFormField<String>(
-          key: ValueKey(department),
-          initialValue: department,
-          isExpanded: true,
-          decoration: const InputDecoration(
-            labelText: 'Department',
-            prefixIcon: Icon(Icons.business_outlined),
-          ),
-          items: departments
-              .map(
-                (value) => DropdownMenuItem(
-                  value: value,
-                  child: Text(
-                    value == 'All' ? 'All Departments' : value,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              )
-              .toList(),
-          onChanged: (value) => onDepartmentChanged(value ?? 'All'),
-        ),
-        if (hasFilters) ...[
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: onClear,
-              icon: const Icon(Icons.filter_alt_off_outlined, size: 17),
-              label: const Text('Clear filters'),
+              ),
             ),
-          ),
-        ],
-      ],
-    ),
+            if (hasFilters)
+              ActionChip(label: const Text('Clear all'), onPressed: onClear),
+          ],
+        ),
+      ),
+    ],
   );
 }
 
@@ -488,6 +543,8 @@ class _JobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
+    elevation: 2,
+    shadowColor: const Color(0x180F172A),
     color: Colors.white,
     borderRadius: BorderRadius.circular(16),
     child: InkWell(
@@ -583,35 +640,33 @@ class _JobCard extends StatelessWidget {
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Divider(height: 1, color: Color(0xFFF1F5F9)),
             ),
-            Row(
+            Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Icon(
+                _Meta(
                   Icons.groups_outlined,
-                  size: 18,
-                  color: Color(0xFF059669),
-                ),
-                const SizedBox(width: 6),
-                Text(
                   '${job.applicantsCount} applicants',
-                  style: const TextStyle(
-                    color: Color(0xFF047857),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                  ),
                 ),
-                const Spacer(),
-                const Text(
-                  'View details',
-                  style: TextStyle(
-                    color: Color(0xFF059669),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF059669),
-                  size: 18,
+                const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'View details',
+                      style: TextStyle(
+                        color: Color(0xFF059669),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: Color(0xFF059669),
+                      size: 18,
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -632,9 +687,11 @@ class _Meta extends StatelessWidget {
     children: [
       Icon(icon, size: 14, color: const Color(0xFF64748B)),
       const SizedBox(width: 4),
-      Text(
-        text,
-        style: const TextStyle(color: Color(0xFF64748B), fontSize: 11),
+      Flexible(
+        child: Text(
+          text,
+          style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+        ),
       ),
     ],
   );
