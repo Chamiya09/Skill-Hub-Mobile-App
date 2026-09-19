@@ -77,6 +77,11 @@ class _JobsPageState extends State<JobsPage> {
     try {
       await _service.deleteJob(job.id);
       await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('“${job.title}” was deleted.')));
+      }
     } on JobsException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -125,6 +130,17 @@ class _JobsPageState extends State<JobsPage> {
     final active = _jobs
         .where((job) => job.status.toLowerCase() == 'active')
         .length;
+    final hasFilters =
+        query.isNotEmpty || _status != 'All' || _department != 'All';
+
+    void clearFilters() {
+      _search.clear();
+      setState(() {
+        _status = 'All';
+        _department = 'All';
+      });
+    }
+
     return RefreshIndicator(
       color: const Color(0xFF10B981),
       onRefresh: _load,
@@ -133,103 +149,18 @@ class _JobsPageState extends State<JobsPage> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(20),
         children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Colors.white, Color(0xFFECFDF5)],
-              ),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Job Vacancies',
-                        style: TextStyle(
-                          color: Color(0xFF0F172A),
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ),
-                    FilledButton.icon(
-                      onPressed: _openForm,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF10B981),
-                      ),
-                      icon: const Icon(Icons.add_rounded, size: 18),
-                      label: const Text('New'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  'Manage company requisitions and candidate pipelines.',
-                  style: TextStyle(color: Color(0xFF64748B), height: 1.4),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  '$active active ${active == 1 ? 'role' : 'roles'}',
-                  style: const TextStyle(
-                    color: Color(0xFF047857),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _PageHeader(active: active, onCreate: _openForm),
           const SizedBox(height: 14),
-          TextField(
-            controller: _search,
-            decoration: InputDecoration(
-              hintText: 'Search title, department, or location',
-              prefixIcon: const Icon(Icons.search_rounded),
-              suffixIcon: query.isEmpty
-                  ? null
-                  : IconButton(
-                      onPressed: _search.clear,
-                      icon: const Icon(Icons.close_rounded),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            children: ['All', 'Active', 'Draft', 'Closed']
-                .map(
-                  (value) => ChoiceChip(
-                    label: Text(value),
-                    selected: _status == value,
-                    selectedColor: const Color(0xFFD1FAE5),
-                    onSelected: (_) => setState(() => _status = value),
-                  ),
-                )
-                .toList(),
-          ),
-          const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            initialValue: departments.contains(_department)
-                ? _department
-                : 'All',
-            decoration: const InputDecoration(
-              labelText: 'Department',
-              prefixIcon: Icon(Icons.business_outlined),
-            ),
-            items: departments
-                .map(
-                  (v) => DropdownMenuItem(
-                    value: v,
-                    child: Text(v == 'All' ? 'All Departments' : v),
-                  ),
-                )
-                .toList(),
-            onChanged: (v) => setState(() => _department = v ?? 'All'),
+          _FiltersPanel(
+            search: _search,
+            query: query,
+            status: _status,
+            department: departments.contains(_department) ? _department : 'All',
+            departments: departments,
+            hasFilters: hasFilters,
+            onStatusChanged: (value) => setState(() => _status = value),
+            onDepartmentChanged: (value) => setState(() => _department = value),
+            onClear: clearFilters,
           ),
           if (_error != null)
             Padding(
@@ -254,15 +185,20 @@ class _JobsPageState extends State<JobsPage> {
               ),
             ),
           const SizedBox(height: 16),
+          _ResultsHeader(
+            shown: jobs.length,
+            total: _jobs.length,
+            filtered: hasFilters,
+          ),
+          const SizedBox(height: 10),
           if (_loading)
-            const Padding(
-              padding: EdgeInsets.all(50),
-              child: Center(
-                child: CircularProgressIndicator(color: Color(0xFF10B981)),
-              ),
-            )
+            const _LoadingState()
           else if (jobs.isEmpty)
-            const _EmptyState()
+            _EmptyState(
+              filtered: hasFilters,
+              onClear: clearFilters,
+              onCreate: _openForm,
+            )
           else
             ...jobs.map(
               (job) => Padding(
@@ -286,6 +222,248 @@ class _JobsPageState extends State<JobsPage> {
   }
 }
 
+class _PageHeader extends StatelessWidget {
+  const _PageHeader({required this.active, required this.onCreate});
+
+  final int active;
+  final VoidCallback onCreate;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(colors: [Colors.white, Color(0xFFECFDF5)]),
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: const Color(0xFFE2E8F0)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 320;
+            final title = const Text(
+              'Job Vacancies',
+              style: TextStyle(
+                color: Color(0xFF0F172A),
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+              ),
+            );
+            final button = FilledButton.icon(
+              onPressed: onCreate,
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+              ),
+              icon: const Icon(Icons.add_rounded, size: 18),
+              label: const Text('New'),
+            );
+            if (compact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [title, const SizedBox(height: 12), button],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: title),
+                const SizedBox(width: 10),
+                button,
+              ],
+            );
+          },
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'Manage company requisitions and candidate pipelines.',
+          style: TextStyle(color: Color(0xFF64748B), height: 1.4),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          decoration: BoxDecoration(
+            color: const Color(0xFFD1FAE5),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(
+            '$active active ${active == 1 ? 'role' : 'roles'}',
+            style: const TextStyle(
+              color: Color(0xFF047857),
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _FiltersPanel extends StatelessWidget {
+  const _FiltersPanel({
+    required this.search,
+    required this.query,
+    required this.status,
+    required this.department,
+    required this.departments,
+    required this.hasFilters,
+    required this.onStatusChanged,
+    required this.onDepartmentChanged,
+    required this.onClear,
+  });
+
+  final TextEditingController search;
+  final String query;
+  final String status;
+  final String department;
+  final List<String> departments;
+  final bool hasFilters;
+  final ValueChanged<String> onStatusChanged;
+  final ValueChanged<String> onDepartmentChanged;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(14),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFE2E8F0)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: search,
+          textInputAction: TextInputAction.search,
+          decoration: InputDecoration(
+            hintText: 'Search title, department, or location',
+            prefixIcon: const Icon(Icons.search_rounded),
+            suffixIcon: query.isEmpty
+                ? null
+                : IconButton(
+                    tooltip: 'Clear search',
+                    onPressed: search.clear,
+                    icon: const Icon(Icons.close_rounded),
+                  ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        const Text(
+          'STATUS',
+          style: TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: .7,
+          ),
+        ),
+        const SizedBox(height: 7),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: ['All', 'Active', 'Draft', 'Closed']
+              .map(
+                (value) => ChoiceChip(
+                  label: Text(value),
+                  selected: status == value,
+                  selectedColor: const Color(0xFFD1FAE5),
+                  onSelected: (_) => onStatusChanged(value),
+                ),
+              )
+              .toList(),
+        ),
+        const SizedBox(height: 12),
+        DropdownButtonFormField<String>(
+          key: ValueKey(department),
+          initialValue: department,
+          isExpanded: true,
+          decoration: const InputDecoration(
+            labelText: 'Department',
+            prefixIcon: Icon(Icons.business_outlined),
+          ),
+          items: departments
+              .map(
+                (value) => DropdownMenuItem(
+                  value: value,
+                  child: Text(
+                    value == 'All' ? 'All Departments' : value,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              )
+              .toList(),
+          onChanged: (value) => onDepartmentChanged(value ?? 'All'),
+        ),
+        if (hasFilters) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: onClear,
+              icon: const Icon(Icons.filter_alt_off_outlined, size: 17),
+              label: const Text('Clear filters'),
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+}
+
+class _ResultsHeader extends StatelessWidget {
+  const _ResultsHeader({
+    required this.shown,
+    required this.total,
+    required this.filtered,
+  });
+
+  final int shown;
+  final int total;
+  final bool filtered;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      const Expanded(
+        child: Text(
+          'All vacancies',
+          style: TextStyle(
+            color: Color(0xFF0F172A),
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      Text(
+        filtered ? '$shown of $total' : '$total total',
+        style: const TextStyle(
+          color: Color(0xFF64748B),
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ],
+  );
+}
+
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(vertical: 48),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: const Color(0xFFE2E8F0)),
+    ),
+    child: const Center(
+      child: CircularProgressIndicator(color: Color(0xFF10B981)),
+    ),
+  );
+}
+
 class _JobCard extends StatelessWidget {
   const _JobCard({
     required this.job,
@@ -295,6 +473,19 @@ class _JobCard extends StatelessWidget {
   });
   final JobVacancy job;
   final VoidCallback onTap, onEdit, onDelete;
+
+  Color get _statusBackground => switch (job.status.toLowerCase()) {
+    'draft' => const Color(0xFFFFFBEB),
+    'closed' => const Color(0xFFF1F5F9),
+    _ => const Color(0xFFECFDF5),
+  };
+
+  Color get _statusColor => switch (job.status.toLowerCase()) {
+    'draft' => const Color(0xFFB45309),
+    'closed' => const Color(0xFF475569),
+    _ => const Color(0xFF047857),
+  };
+
   @override
   Widget build(BuildContext context) => Material(
     color: Colors.white,
@@ -331,13 +522,13 @@ class _JobCard extends StatelessWidget {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
+                    color: _statusBackground,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     job.status,
-                    style: const TextStyle(
-                      color: Color(0xFF047857),
+                    style: TextStyle(
+                      color: _statusColor,
                       fontSize: 10,
                       fontWeight: FontWeight.w700,
                     ),
@@ -450,7 +641,16 @@ class _Meta extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({
+    required this.filtered,
+    required this.onClear,
+    required this.onCreate,
+  });
+
+  final bool filtered;
+  final VoidCallback onClear;
+  final VoidCallback onCreate;
+
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
@@ -459,9 +659,9 @@ class _EmptyState extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       border: Border.all(color: const Color(0xFFE2E8F0)),
     ),
-    child: const Column(
+    child: Column(
       children: [
-        CircleAvatar(
+        const CircleAvatar(
           radius: 31,
           backgroundColor: Color(0xFFD1FAE5),
           child: Icon(
@@ -470,15 +670,43 @@ class _EmptyState extends StatelessWidget {
             size: 30,
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Text(
-          'No job vacancies found',
-          style: TextStyle(
+          filtered ? 'No matching vacancies' : 'No job vacancies yet',
+          style: const TextStyle(
             color: Color(0xFF0F172A),
             fontSize: 17,
             fontWeight: FontWeight.w700,
           ),
         ),
+        const SizedBox(height: 7),
+        Text(
+          filtered
+              ? 'Try changing your search or clearing the selected filters.'
+              : 'Create your first vacancy to start building a candidate pipeline.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Color(0xFF64748B),
+            fontSize: 12,
+            height: 1.5,
+          ),
+        ),
+        const SizedBox(height: 18),
+        if (filtered)
+          OutlinedButton.icon(
+            onPressed: onClear,
+            icon: const Icon(Icons.filter_alt_off_outlined, size: 17),
+            label: const Text('Clear filters'),
+          )
+        else
+          FilledButton.icon(
+            onPressed: onCreate,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF10B981),
+            ),
+            icon: const Icon(Icons.add_rounded, size: 17),
+            label: const Text('Create job'),
+          ),
       ],
     ),
   );
