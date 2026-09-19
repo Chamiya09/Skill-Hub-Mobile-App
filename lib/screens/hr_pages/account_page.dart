@@ -2,157 +2,120 @@ import 'package:flutter/material.dart';
 
 import '../../services/auth_service.dart';
 import '../login_screen.dart';
+import 'company_profile_screen.dart';
+import 'security_screen.dart';
 
-class AccountPage extends StatelessWidget {
+enum _AccountTab { profile, security }
+
+class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
+  @override
+  State<AccountPage> createState() => _AccountPageState();
+}
 
-  Future<void> _logout(BuildContext context) async {
+class _AccountPageState extends State<AccountPage> {
+  _AccountTab _tab = _AccountTab.profile;
+
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.logout_rounded, color: Color(0xFFDC2626)),
+        title: const Text('Sign out?'),
+        content: const Text(
+          'You will need to sign in again to manage your company account.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626),
+            ),
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
     await AuthService().logout();
-    if (!context.mounted) return;
+    if (!mounted) return;
     Navigator.of(context)
         .pushNamedAndRemoveUntil(LoginScreen.routeName, (_) => false);
   }
 
   @override
-  Widget build(BuildContext context) => ListView(
-    key: const PageStorageKey('account-page'),
-    padding: const EdgeInsets.all(20),
+  Widget build(BuildContext context) => Column(
     children: [
-      const Text(
-        'Company account',
-        style: TextStyle(
-          color: Color(0xFF0F172A),
-          fontSize: 24,
-          fontWeight: FontWeight.w800,
-        ),
-      ),
-      const SizedBox(height: 6),
-      const Text(
-        'Manage your enterprise profile and security.',
-        style: TextStyle(color: Color(0xFF64748B)),
-      ),
-      const SizedBox(height: 24),
-      Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: const Row(
+      Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+        child: Column(
           children: [
-            CircleAvatar(
-              radius: 28,
-              backgroundColor: Color(0xFFD1FAE5),
-              child: Icon(
-                Icons.business_rounded,
-                color: Color(0xFF059669),
-                size: 28,
-              ),
+            Row(
+              children: [
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Company Account',
+                        style: TextStyle(
+                          color: Color(0xFF0F172A),
+                          fontSize: 23,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'View and manage your company profile and security.',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton.filledTonal(
+                  tooltip: 'Sign out',
+                  onPressed: _logout,
+                  icon: const Icon(
+                    Icons.logout_rounded,
+                    color: Color(0xFFDC2626),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Company Profile',
-                    style: TextStyle(
-                      color: Color(0xFF0F172A),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Enterprise HR account',
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 14),
+            SegmentedButton<_AccountTab>(
+              segments: const [
+                ButtonSegment(
+                  value: _AccountTab.profile,
+                  icon: Icon(Icons.business_outlined),
+                  label: Text('Company Profile'),
+                ),
+                ButtonSegment(
+                  value: _AccountTab.security,
+                  icon: Icon(Icons.shield_outlined),
+                  label: Text('Security'),
+                ),
+              ],
+              selected: {_tab},
+              showSelectedIcon: false,
+              onSelectionChanged: (value) => setState(() => _tab = value.first),
             ),
           ],
         ),
       ),
-      const SizedBox(height: 16),
-      const _AccountTile(
-        Icons.business_outlined,
-        'Company details',
-        'Name, industry and contact information',
-      ),
-      const SizedBox(height: 10),
-      const _AccountTile(
-        Icons.lock_outline_rounded,
-        'Security',
-        'Update your company password',
-      ),
-      const SizedBox(height: 28),
-      OutlinedButton.icon(
-        onPressed: () => _logout(context),
-        icon: const Icon(Icons.logout_rounded),
-        label: const Text('Sign Out'),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFFDC2626),
-          minimumSize: const Size.fromHeight(52),
-          side: const BorderSide(color: Color(0xFFFECACA)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+      Expanded(
+        child: IndexedStack(
+          index: _tab.index,
+          children: const [CompanyProfileScreen(), SecurityScreen()],
         ),
       ),
     ],
-  );
-}
-
-class _AccountTile extends StatelessWidget {
-  const _AccountTile(this.icon, this.title, this.subtitle);
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) => Material(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(14),
-    child: InkWell(
-      onTap: () {},
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: const Color(0xFF059669)),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Color(0xFF0F172A),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: Color(0xFF64748B),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
-          ],
-        ),
-      ),
-    ),
   );
 }
