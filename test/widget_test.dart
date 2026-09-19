@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:skill_hub_mobile_app/config/api_config.dart';
 import 'package:skill_hub_mobile_app/models/job.dart';
 import 'package:skill_hub_mobile_app/screens/candidate/candidate_main_scaffold.dart';
 
@@ -28,5 +29,17 @@ void main() {
     expect(candidateGreeting(DateTime(2026, 1, 1, 13)), 'Good Afternoon');
     expect(candidateGreeting(DateTime(2026, 1, 1, 19)), 'Good Evening');
     expect(candidateGreeting(DateTime(2026, 1, 1, 23)), 'Good Night');
+  });
+
+  test('builds an Android emulator API endpoint outside web', () {
+    final endpoint = ApiConfig.endpoint(
+      'public/jobs',
+      queryParameters: {'limit': '6'},
+    );
+
+    expect(
+      endpoint.toString(),
+      'http://10.0.2.2:5155/api/public/jobs?limit=6',
+    );
   });
 }
