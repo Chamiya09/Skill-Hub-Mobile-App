@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../models/job.dart';
+import '../../services/public_jobs_service.dart';
+
 const _emerald = Color(0xFF10B981);
 const _emeraldDark = Color(0xFF047857);
 const _ink = Color(0xFF111827);
@@ -14,52 +17,68 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final Set<int> _savedJobs = <int>{1};
+  final PublicJobsService _jobsService = PublicJobsService();
+  final Set<String> _savedJobIds = <String>{};
+  List<Job> _jobs = const [];
+  bool _isLoading = true;
+  bool _showAll = false;
+  int _requestGeneration = 0;
+  String? _error;
+  String _searchQuery = '';
 
-  static const _jobs = [
-    _JobPreview(
-      role: 'Flutter Developer',
-      company: 'Nova Technologies',
-      location: 'Colombo, Sri Lanka',
-      workMode: 'Hybrid',
-      salary: 'LKR 180K - 260K',
-      match: 94,
-      posted: '2h ago',
-      skills: ['Flutter', 'Dart', 'REST API'],
-      logoText: 'N',
-    ),
-    _JobPreview(
-      role: 'Associate Software Engineer',
-      company: 'Vertex Labs',
-      location: 'Remote',
-      workMode: 'Full-time',
-      salary: 'LKR 150K - 220K',
-      match: 88,
-      posted: '1d ago',
-      skills: ['C#', '.NET', 'PostgreSQL'],
-      logoText: 'V',
-    ),
-    _JobPreview(
-      role: 'Mobile Application Intern',
-      company: 'Cloud Nine Digital',
-      location: 'Kandy, Sri Lanka',
-      workMode: 'On-site',
-      salary: 'Paid internship',
-      match: 82,
-      posted: '2d ago',
-      skills: ['Mobile', 'Git', 'UI/UX'],
-      logoText: 'C',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadJobs();
+  }
+
+  @override
+  void dispose() {
+    _jobsService.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadJobs({String? search, bool? showAll}) async {
+    final requestGeneration = ++_requestGeneration;
+    final nextSearch = search ?? _searchQuery;
+    final nextShowAll = showAll ?? _showAll;
+    setState(() {
+      _isLoading = true;
+      _error = null;
+      _searchQuery = nextSearch;
+      _showAll = nextShowAll;
+    });
+
+    try {
+      final jobs = await _jobsService.getJobs(
+        search: nextSearch,
+        limit: nextShowAll ? null : 6,
+      );
+      if (!mounted || requestGeneration != _requestGeneration) return;
+      setState(() => _jobs = jobs);
+    } on JobsApiException catch (error) {
+      if (!mounted || requestGeneration != _requestGeneration) return;
+      setState(() => _error = error.message);
+    } finally {
+      if (mounted && requestGeneration == _requestGeneration) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
       color: Colors.white,
-      child: CustomScrollView(
-        key: const PageStorageKey('candidate-home-scroll'),
-        physics: const BouncingScrollPhysics(),
-        slivers: [
+      child: RefreshIndicator(
+        color: _emerald,
+        onRefresh: _loadJobs,
+        child: CustomScrollView(
+          key: const PageStorageKey('candidate-home-scroll'),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
             sliver: SliverList.list(
@@ -98,42 +117,54 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 22),
                 _SearchField(
-                  onSearch: (query) => _showMessage(
-                    query.isEmpty ? 'Opening all jobs.' : 'Searching for "$query".',
-                  ),
+                  onSearch: (query) => _loadJobs(search: query, showAll: true),
                 ),
                 const SizedBox(height: 18),
-                const _TrustHighlights(),
+                _TrustHighlights(
+                  activeJobs: _jobs.length,
+                  isLoading: _isLoading,
+                ),
                 const SizedBox(height: 32),
                 const _FeatureStrip(),
                 const SizedBox(height: 34),
                 _SectionHeader(
                   title: 'Top live opportunities',
                   subtitle: 'FEATURED ROLES',
-                  actionLabel: 'View all',
-                  onAction: () => _showMessage('Opening all available jobs.'),
+                  actionLabel: _showAll ? null : 'View all',
+                  onAction: () => _loadJobs(showAll: true),
                 ),
                 const SizedBox(height: 14),
-                ...List<int>.generate(_jobs.length, (index) => index).map(
-                  (index) => Padding(
+                if (_isLoading) const _JobsLoadingState(),
+                if (!_isLoading && _error != null)
+                  _JobsErrorState(
+                    message: _error!,
+                    onRetry: _loadJobs,
+                  ),
+                if (!_isLoading && _error == null && _jobs.isEmpty)
+                  _JobsEmptyState(hasSearch: _searchQuery.isNotEmpty),
+                if (!_isLoading && _error == null)
+                  ..._jobs.map(
+                  (job) => Padding(
                     padding: const EdgeInsets.only(bottom: 14),
                     child: _JobCard(
-                      job: _jobs[index],
-                      isSaved: _savedJobs.contains(index),
+                      job: job,
+                      isSaved: _savedJobIds.contains(job.id),
                       onSave: () {
                         setState(() {
-                          if (!_savedJobs.add(index)) _savedJobs.remove(index);
+                          if (!_savedJobIds.add(job.id)) {
+                            _savedJobIds.remove(job.id);
+                          }
                         });
                       },
-                      onView: () =>
-                          _showMessage('${_jobs[index].role} selected.'),
+                      onView: () => _showMessage('${job.title} selected.'),
                     ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -254,18 +285,21 @@ class _SearchFieldState extends State<_SearchField> {
 }
 
 class _TrustHighlights extends StatelessWidget {
-  const _TrustHighlights();
+  const _TrustHighlights({required this.activeJobs, required this.isLoading});
+
+  final int activeJobs;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    return const Wrap(
+    return Wrap(
       alignment: WrapAlignment.center,
       spacing: 14,
       runSpacing: 8,
       children: [
-        _TrustItem(label: 'Verified roles'),
-        _TrustItem(label: 'AI matching'),
-        _TrustItem(label: 'Direct employers'),
+        _TrustItem(label: isLoading ? 'Loading roles...' : '$activeJobs active roles'),
+        const _TrustItem(label: 'AI matching'),
+        const _TrustItem(label: 'Direct employers'),
       ],
     );
   }
@@ -460,7 +494,7 @@ class _JobCard extends StatelessWidget {
     required this.onView,
   });
 
-  final _JobPreview job;
+  final Job job;
   final bool isSaved;
   final VoidCallback onSave;
   final VoidCallback onView;
@@ -497,7 +531,7 @@ class _JobCard extends StatelessWidget {
                   border: Border.all(color: const Color(0xFFD1FAE5)),
                 ),
                 child: Text(
-                  job.logoText,
+                  job.companyInitials,
                   style: const TextStyle(
                     color: _emeraldDark,
                     fontSize: 19,
@@ -511,7 +545,7 @@ class _JobCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      job.role,
+                      job.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -523,7 +557,7 @@ class _JobCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      job.company,
+                      job.companyName,
                       style: const TextStyle(
                         color: _bodyText,
                         fontSize: 13,
@@ -550,14 +584,17 @@ class _JobCard extends StatelessWidget {
             runSpacing: 8,
             children: [
               _MetaPill(icon: Icons.location_on_outlined, label: job.location),
-              _MetaPill(icon: Icons.business_center_outlined, label: job.workMode),
+              _MetaPill(
+                icon: Icons.business_center_outlined,
+                label: job.employmentType,
+              ),
             ],
           ),
           const SizedBox(height: 13),
           Wrap(
             spacing: 7,
             runSpacing: 7,
-            children: job.skills
+            children: job.detailTags
                 .map(
                   (skill) => Container(
                     padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
@@ -587,7 +624,7 @@ class _JobCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      job.salary,
+                      job.salaryLabel,
                       style: const TextStyle(
                         color: _ink,
                         fontSize: 13,
@@ -596,28 +633,12 @@ class _JobCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Posted ${job.posted}',
+                      job.postedLabel,
                       style: const TextStyle(color: _bodyText, fontSize: 11),
                     ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  '${job.match}% Match',
-                  style: const TextStyle(
-                    color: _emeraldDark,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
               FilledButton(
                 onPressed: onView,
                 style: FilledButton.styleFrom(
@@ -636,6 +657,140 @@ class _JobCard extends StatelessWidget {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _JobsLoadingState extends StatelessWidget {
+  const _JobsLoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: List.generate(
+        3,
+        (index) => Container(
+          height: 218,
+          margin: const EdgeInsets.only(bottom: 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            border: Border.all(color: const Color(0xFFF1F5F9)),
+            borderRadius: BorderRadius.circular(18),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: _emerald,
+              strokeWidth: 2.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JobsErrorState extends StatelessWidget {
+  const _JobsErrorState({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return _JobsMessageCard(
+      icon: Icons.cloud_off_outlined,
+      title: 'Could not load jobs',
+      message: message,
+      actionLabel: 'Try again',
+      onAction: onRetry,
+    );
+  }
+}
+
+class _JobsEmptyState extends StatelessWidget {
+  const _JobsEmptyState({required this.hasSearch});
+
+  final bool hasSearch;
+
+  @override
+  Widget build(BuildContext context) {
+    return _JobsMessageCard(
+      icon: Icons.search_off_rounded,
+      title: hasSearch ? 'No matching jobs' : 'No active vacancies right now',
+      message: hasSearch
+          ? 'Try a different role, company, skill, or location.'
+          : 'Employers are updating their open roles. Please check back soon.',
+    );
+  }
+}
+
+class _JobsMessageCard extends StatelessWidget {
+  const _JobsMessageCard({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: _border),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 48,
+            height: 48,
+            decoration: const BoxDecoration(
+              color: Color(0xFFF1F5F9),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: _bodyText),
+          ),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: _ink,
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: _bodyText, fontSize: 12, height: 1.5),
+          ),
+          if (actionLabel != null) ...[
+            const SizedBox(height: 14),
+            TextButton(
+              onPressed: onAction,
+              child: Text(
+                actionLabel!,
+                style: const TextStyle(
+                  color: _emeraldDark,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -666,28 +821,4 @@ class _MetaPill extends StatelessWidget {
       ],
     );
   }
-}
-
-class _JobPreview {
-  const _JobPreview({
-    required this.role,
-    required this.company,
-    required this.location,
-    required this.workMode,
-    required this.salary,
-    required this.match,
-    required this.posted,
-    required this.skills,
-    required this.logoText,
-  });
-
-  final String role;
-  final String company;
-  final String location;
-  final String workMode;
-  final String salary;
-  final int match;
-  final String posted;
-  final List<String> skills;
-  final String logoText;
 }

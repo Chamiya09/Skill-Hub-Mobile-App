@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'candidate_home_screen.dart';
@@ -5,6 +7,14 @@ import 'candidate_home_screen.dart';
 const Color _emerald = Color(0xFF10B981);
 const Color _darkText = Color(0xFF1F2937);
 const Color _mutedText = Color(0xFF9CA3AF);
+
+String candidateGreeting(DateTime time) {
+  final hour = time.hour;
+  if (hour >= 5 && hour < 12) return 'Good Morning';
+  if (hour >= 12 && hour < 17) return 'Good Afternoon';
+  if (hour >= 17 && hour < 22) return 'Good Evening';
+  return 'Good Night';
+}
 
 class CandidateMainScaffold extends StatefulWidget {
   const CandidateMainScaffold({super.key});
@@ -16,6 +26,8 @@ class CandidateMainScaffold extends StatefulWidget {
 
 class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
   int _selectedIndex = 0;
+  DateTime _currentTime = DateTime.now();
+  Timer? _greetingTimer;
 
   static const List<Widget> _screens = <Widget>[
     HomeScreen(),
@@ -23,6 +35,20 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
     InterviewsScreen(),
     AccountScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _greetingTimer = Timer.periodic(const Duration(minutes: 1), (_) {
+      if (mounted) setState(() => _currentTime = DateTime.now());
+    });
+  }
+
+  @override
+  void dispose() {
+    _greetingTimer?.cancel();
+    super.dispose();
+  }
 
   void _selectTab(int index) {
     setState(() => _selectedIndex = index);
@@ -38,9 +64,9 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
         elevation: 0,
         scrolledUnderElevation: 0,
         titleSpacing: 20,
-        title: const Text(
-          'Hello, Chamod!',
-          style: TextStyle(
+        title: Text(
+          '${candidateGreeting(_currentTime)}, Chamod!',
+          style: const TextStyle(
             color: _darkText,
             fontSize: 22,
             fontWeight: FontWeight.w700,
