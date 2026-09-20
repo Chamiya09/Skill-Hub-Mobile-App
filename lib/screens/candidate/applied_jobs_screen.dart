@@ -11,8 +11,13 @@ const _muted = Color(0xFF64748B);
 const _border = Color(0xFFE2E8F0);
 
 class AppliedJobsScreen extends StatefulWidget {
-  const AppliedJobsScreen({super.key, required this.token});
+  const AppliedJobsScreen({
+    super.key,
+    required this.token,
+    required this.onOpenAssessments,
+  });
   final String token;
+  final VoidCallback onOpenAssessments;
 
   @override
   State<AppliedJobsScreen> createState() => _AppliedJobsScreenState();
@@ -159,13 +164,19 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
   void _openFindJobs() => Navigator.of(context)
       .push(MaterialPageRoute<void>(builder: (_) => const FindJobsScreen()));
 
-  void _showProgress(CandidateApplication application) {
-    showModalBottomSheet<void>(
+  Future<void> _showProgress(CandidateApplication application) async {
+    final openAssessments = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _ProgressSheet(application: application),
+      builder: (sheetContext) => _ProgressSheet(
+        application: application,
+        onOpenAssessments: () => Navigator.of(sheetContext).pop(true),
+      ),
     );
+    if (openAssessments == true && mounted) {
+      widget.onOpenAssessments();
+    }
   }
 }
 
@@ -389,25 +400,25 @@ class _ApplicationCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                  OutlinedButton.icon(
+                  FilledButton.icon(
                     onPressed: onTap,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: _emeraldDark,
-                      side: const BorderSide(color: Color(0xFFD7E5DF)),
-                      backgroundColor: Colors.white,
+                    style: FilledButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: _emeraldDark,
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 9,
+                        horizontal: 14,
+                        vertical: 11,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(9),
+                        borderRadius: BorderRadius.circular(11),
                       ),
+                      elevation: 0,
                     ),
-                    icon: const Icon(Icons.timeline_rounded, size: 15),
+                    icon: const Icon(Icons.timeline_rounded, size: 16),
                     label: const Text(
-                      'Track Progress ↗',
+                      'Track Progress',
                       style: TextStyle(
-                        color: _emeraldDark,
+                        color: Colors.white,
                         fontSize: 11,
                         fontWeight: FontWeight.w900,
                       ),
@@ -424,8 +435,12 @@ class _ApplicationCard extends StatelessWidget {
 }
 
 class _ProgressSheet extends StatelessWidget {
-  const _ProgressSheet({required this.application});
+  const _ProgressSheet({
+    required this.application,
+    required this.onOpenAssessments,
+  });
   final CandidateApplication application;
+  final VoidCallback onOpenAssessments;
   @override
   Widget build(BuildContext context) {
     final stage = _stage(application.status);
@@ -589,51 +604,25 @@ class _ProgressSheet extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    if (!rejected &&
-                        !suspended &&
-                        (stage == 2 || stage == 3)) ...[
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed: () => Navigator.pop(context),
-                          style: FilledButton.styleFrom(
-                            backgroundColor: _emerald,
-                            padding: const EdgeInsets.symmetric(vertical: 13),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          icon: Icon(
-                            stage == 3
-                                ? Icons.code_rounded
-                                : Icons.record_voice_over_rounded,
-                            size: 18,
-                          ),
-                          label: Text(
-                            stage == 3
-                                ? 'Go to Technical Assessments'
-                                : 'Practice Mock Interview',
-                            style: const TextStyle(fontWeight: FontWeight.w800),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 9),
-                    ],
                     SizedBox(
                       width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF334155),
-                          side: const BorderSide(color: Color(0xFFDBE3EC)),
-                          padding: const EdgeInsets.symmetric(vertical: 13),
+                      child: FilledButton.icon(
+                        onPressed: onOpenAssessments,
+                        style: FilledButton.styleFrom(
+                          backgroundColor: _emerald,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          elevation: 0,
                         ),
-                        icon: const Icon(Icons.description_outlined, size: 18),
+                        icon: const Icon(
+                          Icons.assignment_turned_in_rounded,
+                          size: 18,
+                        ),
                         label: const Text(
-                          'Close Progress Details',
+                          'Assessment Results',
                           style: TextStyle(fontWeight: FontWeight.w800),
                         ),
                       ),

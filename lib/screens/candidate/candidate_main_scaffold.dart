@@ -68,6 +68,7 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
         user: widget.user,
         token: widget.token,
         onLogout: widget.onLogout,
+        onOpenAssessments: () => _selectTab(1),
       ),
     ];
     return Scaffold(
@@ -349,11 +350,13 @@ class AccountScreen extends StatelessWidget {
     required this.user,
     required this.token,
     required this.onLogout,
+    required this.onOpenAssessments,
   });
 
   final CandidateUser user;
   final String token;
   final Future<void> Function() onLogout;
+  final VoidCallback onOpenAssessments;
 
   @override
   Widget build(BuildContext context) {
@@ -477,7 +480,16 @@ class AccountScreen extends StatelessWidget {
           icon: Icons.work_outline_rounded,
           title: 'Applied Jobs',
           subtitle: 'Track your submitted job applications',
-          onTap: () => _open(context, AppliedJobsScreen(token: token)),
+          onTap: () => _open(
+            context,
+            AppliedJobsScreen(
+              token: token,
+              onOpenAssessments: () {
+                Navigator.of(context).pop();
+                onOpenAssessments();
+              },
+            ),
+          ),
         ),
         const SizedBox(height: 10),
         _AccountMenuCard(
