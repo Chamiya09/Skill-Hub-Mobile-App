@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
+import 'find_jobs_screen.dart';
 import 'job_view_screen.dart';
 
 const _emerald = Color(0xFF10B981);
@@ -118,8 +119,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(height: 22),
                   _SearchField(
-                    onSearch: (query) =>
-                        _loadJobs(search: query, showAll: true),
+                    onSearch: (query) => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => FindJobsScreen(initialQuery: query),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 18),
                   _TrustHighlights(
@@ -130,10 +134,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   const _FeatureStrip(),
                   const SizedBox(height: 34),
                   _SectionHeader(
-                    title: 'Top live opportunities',
-                    subtitle: 'FEATURED ROLES',
-                    actionLabel: _showAll ? null : 'View all',
-                    onAction: () => _loadJobs(showAll: true),
+                    title: _searchQuery.isEmpty
+                        ? 'Top live opportunities'
+                        : 'Results for “$_searchQuery”',
+                    subtitle: _searchQuery.isEmpty
+                        ? 'FEATURED ROLES'
+                        : '${_jobs.length} MATCHING ${_jobs.length == 1 ? 'ROLE' : 'ROLES'}',
+                    actionLabel: _showAll || _searchQuery.isNotEmpty
+                        ? null
+                        : 'View all',
+                    onAction: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const FindJobsScreen(),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 14),
                   if (_isLoading) const _JobsLoadingState(),
@@ -218,11 +232,27 @@ class _SearchField extends StatefulWidget {
 
 class _SearchFieldState extends State<_SearchField> {
   final _controller = TextEditingController();
+  bool _hasText = false;
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _onChanged(String value) {
+    final hasText = value.isNotEmpty;
+    if (hasText != _hasText) setState(() => _hasText = hasText);
+  }
+
+  void _submit([String? value]) {
+    widget.onSearch((value ?? _controller.text).trim());
+  }
+
+  void _clear() {
+    _controller.clear();
+    setState(() => _hasText = false);
+    FocusScope.of(context).unfocus();
   }
 
   @override
@@ -249,7 +279,8 @@ class _SearchFieldState extends State<_SearchField> {
             child: TextField(
               controller: _controller,
               textInputAction: TextInputAction.search,
-              onSubmitted: widget.onSearch,
+              onChanged: _onChanged,
+              onSubmitted: _submit,
               style: const TextStyle(color: _ink, fontSize: 13),
               decoration: const InputDecoration(
                 hintText: 'Jobs, companies, or skills...',
@@ -259,12 +290,23 @@ class _SearchFieldState extends State<_SearchField> {
               ),
             ),
           ),
+          if (_hasText)
+            IconButton(
+              tooltip: 'Clear search',
+              onPressed: _clear,
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(
+                Icons.close_rounded,
+                color: Color(0xFF94A3B8),
+                size: 19,
+              ),
+            ),
           SizedBox(
             width: 48,
             height: 46,
             child: IconButton.filled(
               tooltip: 'Search jobs',
-              onPressed: () => widget.onSearch(_controller.text.trim()),
+              onPressed: _submit,
               style: IconButton.styleFrom(
                 backgroundColor: _emerald,
                 foregroundColor: Colors.white,
