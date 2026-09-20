@@ -65,35 +65,70 @@ class _JobViewScreenState extends State<JobViewScreen> {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          tooltip: 'Back to jobs',
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back_rounded, color: _ink),
-        ),
-        title: const Text(
-          'Job details',
-          style: TextStyle(
-            color: _ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        actions: [
-          IconButton(
-            tooltip: _saved ? 'Remove saved job' : 'Save job',
-            onPressed: () => setState(() => _saved = !_saved),
-            icon: Icon(
-              _saved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
-              color: _saved ? _emerald : _body,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 76,
+        leadingWidth: 62,
+        titleSpacing: 10,
+        shape: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14, top: 14, bottom: 14),
+          child: Material(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _border),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: Color(0xFF334155),
+                  size: 21,
+                ),
+              ),
             ),
           ),
-          IconButton(
-            tooltip: 'Share job',
-            onPressed: () => _message('Job sharing will be available soon.'),
-            icon: const Icon(Icons.ios_share_rounded, color: _body),
-          ),
-          const SizedBox(width: 8),
-        ],
+        ),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'ROLE OVERVIEW',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _emerald,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Job Details',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _ink,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 11),
+            _JobDetailsTitleIcon(),
+          ],
+        ),
+        actions: const [SizedBox(width: 14)],
       ),
       body: RefreshIndicator(
         color: _emerald,
@@ -104,6 +139,26 @@ class _JobViewScreenState extends State<JobViewScreen> {
           ),
           padding: const EdgeInsets.fromLTRB(18, 18, 18, 32),
           children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _HeaderActionButton(
+                  tooltip: _saved ? 'Remove saved job' : 'Save job',
+                  icon: _saved
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_border_rounded,
+                  active: _saved,
+                  onTap: () => setState(() => _saved = !_saved),
+                ),
+                const SizedBox(width: 8),
+                _HeaderActionButton(
+                  tooltip: 'Share job',
+                  icon: Icons.ios_share_rounded,
+                  onTap: () => _message('Job sharing will be available soon.'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             if (_loading)
               const LinearProgressIndicator(
                 color: _emerald,
@@ -272,6 +327,74 @@ class _HeroCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _JobDetailsTitleIcon extends StatelessWidget {
+  const _JobDetailsTitleIcon();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 42,
+      height: 42,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [_emerald, _emeraldDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(13),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x3310B981),
+            blurRadius: 12,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: const Icon(Icons.article_outlined, color: Colors.white, size: 21),
+    );
+  }
+}
+
+class _HeaderActionButton extends StatelessWidget {
+  const _HeaderActionButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onTap,
+    this.active = false,
+  });
+
+  final String tooltip;
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: active ? const Color(0xFFECFDF5) : Colors.white,
+        borderRadius: BorderRadius.circular(11),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(11),
+          child: Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(11),
+              border: Border.all(
+                color: active ? const Color(0xFFA7F3D0) : _border,
+              ),
+            ),
+            child: Icon(icon, color: active ? _emeraldDark : _body, size: 20),
+          ),
+        ),
       ),
     );
   }
