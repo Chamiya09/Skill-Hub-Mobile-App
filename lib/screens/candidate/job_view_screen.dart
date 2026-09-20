@@ -139,26 +139,6 @@ class _JobViewScreenState extends State<JobViewScreen> {
           ),
           padding: const EdgeInsets.fromLTRB(18, 18, 18, 32),
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                _HeaderActionButton(
-                  tooltip: _saved ? 'Remove saved job' : 'Save job',
-                  icon: _saved
-                      ? Icons.bookmark_rounded
-                      : Icons.bookmark_border_rounded,
-                  active: _saved,
-                  onTap: () => setState(() => _saved = !_saved),
-                ),
-                const SizedBox(width: 8),
-                _HeaderActionButton(
-                  tooltip: 'Share job',
-                  icon: Icons.ios_share_rounded,
-                  onTap: () => _message('Job sharing will be available soon.'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
             if (_loading)
               const LinearProgressIndicator(
                 color: _emerald,
@@ -168,7 +148,12 @@ class _JobViewScreenState extends State<JobViewScreen> {
               _Notice(message: 'Showing saved job information. ${_error!}'),
               const SizedBox(height: 14),
             ],
-            _HeroCard(job: _job),
+            _HeroCard(
+              job: _job,
+              saved: _saved,
+              onSave: () => setState(() => _saved = !_saved),
+              onShare: () => _message('Job sharing will be available soon.'),
+            ),
             const SizedBox(height: 16),
             _MatchCard(
               onTap: () => _message('AI match analysis is coming soon.'),
@@ -223,8 +208,16 @@ class _JobViewScreenState extends State<JobViewScreen> {
 }
 
 class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.job});
+  const _HeroCard({
+    required this.job,
+    required this.saved,
+    required this.onSave,
+    required this.onShare,
+  });
   final Job job;
+  final bool saved;
+  final VoidCallback onSave;
+  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -275,6 +268,26 @@ class _HeroCard extends StatelessWidget {
                     ),
                   ],
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              _HeaderActionButton(
+                tooltip: saved ? 'Remove saved job' : 'Save job',
+                icon: saved
+                    ? Icons.bookmark_rounded
+                    : Icons.bookmark_border_rounded,
+                active: saved,
+                onTap: onSave,
+              ),
+              const SizedBox(width: 8),
+              _HeaderActionButton(
+                tooltip: 'Share job',
+                icon: Icons.ios_share_rounded,
+                onTap: onShare,
               ),
             ],
           ),
