@@ -69,15 +69,12 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        titleSpacing: 20,
-        title: Text(
-          '${candidateGreeting(_currentTime)}, ${widget.user.firstName}!',
-          style: const TextStyle(
-            color: _darkText,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.4,
-          ),
+        toolbarHeight: 72,
+        titleSpacing: 16,
+        title: _CreativeTopTitle(
+          pageIndex: _selectedIndex,
+          greeting: candidateGreeting(_currentTime),
+          firstName: widget.user.firstName,
         ),
         actions: [
           Padding(
@@ -168,6 +165,146 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CreativeTopTitle extends StatelessWidget {
+  const _CreativeTopTitle({
+    required this.pageIndex,
+    required this.greeting,
+    required this.firstName,
+  });
+
+  final int pageIndex;
+  final String greeting;
+  final String firstName;
+
+  static const _pages = [
+    (Icons.assignment_rounded, 'Assessments', 'Show what you can do'),
+    (Icons.calendar_month_rounded, 'Interviews', 'Your next conversations'),
+    (Icons.person_rounded, 'My Account', 'Profile, activity & security'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    if (pageIndex == 0) {
+      return Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF10B981), Color(0xFF047857)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(13),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x3310B981),
+                  blurRadius: 12,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.waving_hand_rounded,
+              color: Colors.white,
+              size: 21,
+            ),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  greeting.toUpperCase(),
+                  style: const TextStyle(
+                    color: _emerald,
+                    fontSize: 9,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  firstName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF0F172A),
+                    fontSize: 21,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    final page = _pages[pageIndex - 1];
+    return Row(
+      children: [
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF10B981), Color(0xFF047857)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(13),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x3310B981),
+                blurRadius: 12,
+                offset: Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Icon(page.$1, color: Colors.white, size: 21),
+        ),
+        const SizedBox(width: 11),
+        Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                page.$3.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: _emerald,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                page.$2,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF0F172A),
+                  fontSize: 21,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
