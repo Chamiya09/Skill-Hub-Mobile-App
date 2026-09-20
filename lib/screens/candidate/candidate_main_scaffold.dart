@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/auth_session.dart';
 import 'applied_jobs_screen.dart';
+import 'saved_jobs_screen.dart';
 import 'candidate_home_screen.dart';
 
 const Color _emerald = Color(0xFF10B981);
@@ -483,14 +484,7 @@ class AccountScreen extends StatelessWidget {
           icon: Icons.bookmark_border_rounded,
           title: 'Saved Jobs',
           subtitle: 'Review opportunities you saved for later',
-          onTap: () => _open(
-            context,
-            const _AccountDestinationPage(
-              title: 'Saved Jobs',
-              icon: Icons.bookmark_border_rounded,
-              message: 'Jobs you save will appear here.',
-            ),
-          ),
+          onTap: () => _open(context, SavedJobsScreen(token: token)),
         ),
         const SizedBox(height: 24),
         OutlinedButton.icon(
@@ -609,38 +603,6 @@ class _BlankDigitalCvPage extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _AccountDestinationPage extends StatelessWidget {
-  const _AccountDestinationPage({
-    required this.title,
-    required this.icon,
-    required this.message,
-  });
-
-  final String title;
-  final IconData icon;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: _darkText,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-      ),
-      body: _PlaceholderScreen(icon: icon, title: title, description: message),
     );
   }
 }

@@ -72,6 +72,21 @@ class ApiService {
     }
   }
 
+  Future<void> delete(String path, {String? bearerToken}) async {
+    final response = await _client
+        .delete(
+          ApiConfig.endpoint(path),
+          headers: {
+            'Accept': 'application/json',
+            if (bearerToken != null) 'Authorization': 'Bearer $bearerToken',
+          },
+        )
+        .timeout(const Duration(seconds: 15));
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(_serverMessage(response), response.statusCode);
+    }
+  }
+
   void dispose() => _client.close();
 
   String _serverMessage(http.Response response) {
