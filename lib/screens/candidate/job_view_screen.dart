@@ -101,18 +101,22 @@ class _JobViewScreenState extends State<JobViewScreen> {
             const SizedBox(height: 16),
             _MatchCard(onTap: () => _message('AI match analysis is coming soon.')),
             const SizedBox(height: 16),
-            _ContentCard(
-              title: 'About the role',
-              child: Text(
-                _plainText(_job.description, fallback: 'The employer has not added a detailed role description yet.'),
-                style: const TextStyle(color: Color(0xFF475569), fontSize: 14, height: 1.65),
-              ),
+            _JobContentCard(
+              eyebrow: 'JOB DESCRIPTION',
+              title: 'About the Role',
+              icon: Icons.description_outlined,
+              content: _job.description,
+              fallback:
+                  'The employer has not added a detailed role description yet.',
             ),
             if (_job.whatWeOffer?.trim().isNotEmpty == true) ...[
               const SizedBox(height: 16),
-              _ContentCard(
-                title: 'What we offer & perks',
-                child: Text(_plainText(_job.whatWeOffer!), style: const TextStyle(color: Color(0xFF475569), fontSize: 14, height: 1.65)),
+              _JobContentCard(
+                eyebrow: 'BENEFITS & CULTURE',
+                title: 'What We Offer & Perks',
+                icon: Icons.redeem_outlined,
+                content: _job.whatWeOffer!,
+                accent: true,
               ),
             ],
             const SizedBox(height: 16),
@@ -225,6 +229,193 @@ class _ContentCard extends StatelessWidget {
   );
 }
 
+class _JobContentCard extends StatelessWidget {
+  const _JobContentCard({
+    required this.eyebrow,
+    required this.title,
+    required this.icon,
+    required this.content,
+    this.fallback = '',
+    this.accent = false,
+  });
+
+  final String eyebrow;
+  final String title;
+  final IconData icon;
+  final String content;
+  final String fallback;
+  final bool accent;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: accent ? const Color(0xFFB7EEDC) : _border,
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x080F172A),
+            blurRadius: 18,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 17),
+            decoration: BoxDecoration(
+              color: accent ? const Color(0xFFF6FFFB) : Colors.white,
+              border: const Border(
+                bottom: BorderSide(color: Color(0xFFF1F5F9)),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFECFDF5),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFD1FAE5)),
+                  ),
+                  child: Icon(icon, color: _emeraldDark, size: 21),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        eyebrow,
+                        style: const TextStyle(
+                          color: _emeraldDark,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: _ink,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 21),
+            child: _RichJobContent(content: content, fallback: fallback),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RichJobContent extends StatelessWidget {
+  const _RichJobContent({required this.content, this.fallback = ''});
+
+  final String content;
+  final String fallback;
+
+  @override
+  Widget build(BuildContext context) {
+    final blocks = _contentBlocks(content, fallback: fallback);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var index = 0; index < blocks.length; index++) ...[
+          _ContentBlockView(block: blocks[index]),
+          if (index != blocks.length - 1) const SizedBox(height: 12),
+        ],
+      ],
+    );
+  }
+}
+
+class _ContentBlockView extends StatelessWidget {
+  const _ContentBlockView({required this.block});
+
+  final _ContentBlock block;
+
+  @override
+  Widget build(BuildContext context) {
+    if (block.type == _ContentBlockType.heading) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 3),
+        child: Text(
+          block.text,
+          style: const TextStyle(
+            color: _ink,
+            fontSize: 15,
+            height: 1.35,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      );
+    }
+
+    if (block.type == _ContentBlockType.bullet) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 20,
+            height: 20,
+            margin: const EdgeInsets.only(top: 1),
+            decoration: const BoxDecoration(
+              color: Color(0xFFECFDF5),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.check_rounded,
+              color: _emeraldDark,
+              size: 13,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              block.text,
+              style: const TextStyle(
+                color: Color(0xFF475569),
+                fontSize: 13.5,
+                height: 1.55,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return Text(
+      block.text,
+      style: const TextStyle(
+        color: Color(0xFF475569),
+        fontSize: 13.5,
+        height: 1.65,
+      ),
+    );
+  }
+}
+
 class _OverviewCard extends StatelessWidget {
   const _OverviewCard({required this.job});
   final Job job;
@@ -320,17 +511,54 @@ class _Notice extends StatelessWidget {
   Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(12), decoration: BoxDecoration(color: const Color(0xFFFFFBEB), borderRadius: BorderRadius.circular(12), border: Border.all(color: const Color(0xFFFDE68A))), child: Row(children: [const Icon(Icons.info_outline_rounded, color: Color(0xFFD97706), size: 19), const SizedBox(width: 9), Expanded(child: Text(message, style: const TextStyle(color: Color(0xFF92400E), fontSize: 11, height: 1.4)))]));
 }
 
-String _plainText(String value, {String fallback = ''}) {
-  final text = value
+enum _ContentBlockType { paragraph, heading, bullet }
+
+class _ContentBlock {
+  const _ContentBlock(this.type, this.text);
+
+  final _ContentBlockType type;
+  final String text;
+}
+
+List<_ContentBlock> _contentBlocks(String value, {String fallback = ''}) {
+  var normalized = value
+      .replaceAll(RegExp(r'<h[1-6][^>]*>', caseSensitive: false), '\n## ')
+      .replaceAll(RegExp(r'</h[1-6]>', caseSensitive: false), '\n')
+      .replaceAll(RegExp(r'<li[^>]*>', caseSensitive: false), '\n• ')
+      .replaceAll(RegExp(r'</li>', caseSensitive: false), '\n')
       .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
-      .replaceAll(RegExp(r'</(p|li|div|h[1-6])>', caseSensitive: false), '\n')
-      .replaceAll(RegExp(r'<li[^>]*>', caseSensitive: false), '• ')
+      .replaceAll(
+        RegExp(r'</(p|div|ul|ol)>', caseSensitive: false),
+        '\n',
+      )
       .replaceAll(RegExp(r'<[^>]+>'), '')
       .replaceAll('&amp;', '&')
       .replaceAll('&nbsp;', ' ')
       .replaceAll('&lt;', '<')
       .replaceAll('&gt;', '>')
-      .replaceAll(RegExp(r'\n\s*\n\s*\n+'), '\n\n')
-      .trim();
-  return text.isEmpty ? fallback : text;
+      .replaceAll('&quot;', '"')
+      .replaceAll('&#39;', "'");
+
+  if (normalized.trim().isEmpty) normalized = fallback;
+
+  return normalized
+      .split(RegExp(r'\n+'))
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .map((line) {
+        if (line.startsWith('## ')) {
+          return _ContentBlock(
+            _ContentBlockType.heading,
+            line.substring(3).trim(),
+          );
+        }
+        if (line.startsWith('• ') || line.startsWith('- ')) {
+          return _ContentBlock(
+            _ContentBlockType.bullet,
+            line.substring(2).trim(),
+          );
+        }
+        return _ContentBlock(_ContentBlockType.paragraph, line);
+      })
+      .toList(growable: false);
 }
