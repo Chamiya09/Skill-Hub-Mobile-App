@@ -207,19 +207,42 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.all(20),
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
       children: [
+        const Text(
+          'My Account',
+          style: TextStyle(
+            color: _darkText,
+            fontSize: 24,
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.5,
+          ),
+        ),
+        const SizedBox(height: 5),
+        const Text(
+          'Manage your career profile and job activity.',
+          style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+        ),
+        const SizedBox(height: 18),
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x080F172A),
+                blurRadius: 18,
+                offset: Offset(0, 6),
+              ),
+            ],
           ),
-          child: Column(
+          child: Row(
             children: [
               CircleAvatar(
-                radius: 34,
+                radius: 31,
                 backgroundColor: const Color(0xFFECFDF5),
                 child: Text(
                   user.firstName.characters.first.toUpperCase(),
@@ -230,44 +253,251 @@ class AccountScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
-              Text(
-                user.fullName,
-                style: const TextStyle(
-                  color: _darkText,
-                  fontSize: 19,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                user.email,
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: onLogout,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFFDC2626),
-                    side: const BorderSide(color: Color(0xFFFECACA)),
-                    padding: const EdgeInsets.symmetric(vertical: 13),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user.fullName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: _darkText,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
-                  ),
-                  icon: const Icon(Icons.logout_rounded, size: 19),
-                  label: const Text(
-                    'Sign out',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      user.email,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 12,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFECFDF5),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text(
+                        'VERIFIED CANDIDATE',
+                        style: TextStyle(
+                          color: Color(0xFF047857),
+                          fontSize: 8,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
+        const SizedBox(height: 24),
+        const Text(
+          'CAREER CENTER',
+          style: TextStyle(
+            color: Color(0xFF94A3B8),
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: 10),
+        _AccountMenuCard(
+          icon: Icons.badge_outlined,
+          title: 'My Digital CV',
+          subtitle: 'Manage your verified professional profile',
+          onTap: () => _open(context, const _BlankDigitalCvPage()),
+        ),
+        const SizedBox(height: 10),
+        _AccountMenuCard(
+          icon: Icons.work_outline_rounded,
+          title: 'Applied Jobs',
+          subtitle: 'Track your submitted job applications',
+          onTap: () => _open(
+            context,
+            const _AccountDestinationPage(
+              title: 'Applied Jobs',
+              icon: Icons.work_outline_rounded,
+              message: 'Your submitted job applications will appear here.',
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        _AccountMenuCard(
+          icon: Icons.bookmark_border_rounded,
+          title: 'Saved Jobs',
+          subtitle: 'Review opportunities you saved for later',
+          onTap: () => _open(
+            context,
+            const _AccountDestinationPage(
+              title: 'Saved Jobs',
+              icon: Icons.bookmark_border_rounded,
+              message: 'Jobs you save will appear here.',
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        OutlinedButton.icon(
+          onPressed: onLogout,
+          style: OutlinedButton.styleFrom(
+            foregroundColor: const Color(0xFFDC2626),
+            backgroundColor: Colors.white,
+            side: const BorderSide(color: Color(0xFFFECACA)),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(13),
+            ),
+          ),
+          icon: const Icon(Icons.logout_rounded, size: 19),
+          label: const Text(
+            'Sign out of Skill Hub',
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
       ],
+    );
+  }
+
+  void _open(BuildContext context, Widget page) {
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+  }
+}
+
+class _AccountMenuCard extends StatelessWidget {
+  const _AccountMenuCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFECFDF5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: const Color(0xFF047857), size: 22),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: _darkText,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: const TextStyle(
+                        color: Color(0xFF64748B),
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BlankDigitalCvPage extends StatelessWidget {
+  const _BlankDigitalCvPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        title: const Text(
+          'My Digital CV',
+          style: TextStyle(
+            color: _darkText,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountDestinationPage extends StatelessWidget {
+  const _AccountDestinationPage({
+    required this.title,
+    required this.icon,
+    required this.message,
+  });
+
+  final String title;
+  final IconData icon;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: _darkText,
+            fontSize: 18,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ),
+      body: _PlaceholderScreen(icon: icon, title: title, description: message),
     );
   }
 }
