@@ -99,14 +99,71 @@ class _FindJobsScreenState extends State<FindJobsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'Find Jobs',
-          style: TextStyle(
-            color: _ink,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 76,
+        leadingWidth: 62,
+        titleSpacing: 10,
+        shape: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14, top: 14, bottom: 14),
+          child: Material(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _border),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: Color(0xFF334155),
+                  size: 21,
+                ),
+              ),
+            ),
           ),
         ),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'LIVE OPPORTUNITIES',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _emerald,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Find Jobs',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _ink,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 11),
+            _FindJobsTitleIcon(size: 42),
+          ],
+        ),
+        actions: const [SizedBox(width: 14)],
       ),
       body: RefreshIndicator(
         color: _emerald,
@@ -285,6 +342,40 @@ class _FindJobsHero extends StatelessWidget {
       ),
     ],
   );
+}
+
+class _FindJobsTitleIcon extends StatelessWidget {
+  const _FindJobsTitleIcon({this.size = 50});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [_emerald, _emeraldDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(size * 0.3),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x3310B981),
+            blurRadius: 14,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Icon(
+        Icons.travel_explore_rounded,
+        color: Colors.white,
+        size: size * 0.5,
+      ),
+    );
+  }
 }
 
 class _FilterCard extends StatelessWidget {
