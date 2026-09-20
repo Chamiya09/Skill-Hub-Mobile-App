@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/candidate/candidate_main_scaffold.dart';
+import 'screens/auth/auth_gate.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           surface: Colors.white,
         ),
       ),
-      home: const CandidateMainScaffold(),
+      home: const AuthGate(),
     );
   }
 }

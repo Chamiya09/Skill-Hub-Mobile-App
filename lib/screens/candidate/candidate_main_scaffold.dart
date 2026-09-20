@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../models/auth_session.dart';
 import 'candidate_home_screen.dart';
 
 const Color _emerald = Color(0xFF10B981);
@@ -17,24 +18,23 @@ String candidateGreeting(DateTime time) {
 }
 
 class CandidateMainScaffold extends StatefulWidget {
-  const CandidateMainScaffold({super.key});
+  const CandidateMainScaffold({
+    super.key,
+    required this.user,
+    required this.onLogout,
+  });
+
+  final CandidateUser user;
+  final Future<void> Function() onLogout;
 
   @override
-  State<CandidateMainScaffold> createState() =>
-      _CandidateMainScaffoldState();
+  State<CandidateMainScaffold> createState() => _CandidateMainScaffoldState();
 }
 
 class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
   int _selectedIndex = 0;
   DateTime _currentTime = DateTime.now();
   Timer? _greetingTimer;
-
-  static const List<Widget> _screens = <Widget>[
-    HomeScreen(),
-    AppliedJobsScreen(),
-    InterviewsScreen(),
-    AccountScreen(),
-  ];
 
   @override
   void initState() {
@@ -56,6 +56,12 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
 
   @override
   Widget build(BuildContext context) {
+    final screens = <Widget>[
+      const HomeScreen(),
+      const AppliedJobsScreen(),
+      const InterviewsScreen(),
+      AccountScreen(user: widget.user, onLogout: widget.onLogout),
+    ];
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -65,7 +71,7 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
         scrolledUnderElevation: 0,
         titleSpacing: 20,
         title: Text(
-          '${candidateGreeting(_currentTime)}, Chamod!',
+          '${candidateGreeting(_currentTime)}, ${widget.user.firstName}!',
           style: const TextStyle(
             color: _darkText,
             fontSize: 22,
@@ -106,7 +112,7 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
           ),
         ],
       ),
-      body: IndexedStack(index: _selectedIndex, children: _screens),
+      body: IndexedStack(index: _selectedIndex, children: screens),
       bottomNavigationBar: DecoratedBox(
         decoration: const BoxDecoration(
           color: Colors.white,
@@ -193,14 +199,75 @@ class InterviewsScreen extends StatelessWidget {
 }
 
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key});
+  const AccountScreen({super.key, required this.user, required this.onLogout});
+
+  final CandidateUser user;
+  final Future<void> Function() onLogout;
 
   @override
   Widget build(BuildContext context) {
-    return const _PlaceholderScreen(
-      icon: Icons.person_outline,
-      title: 'Account',
-      description: 'Manage your digital CV and account settings.',
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+          ),
+          child: Column(
+            children: [
+              CircleAvatar(
+                radius: 34,
+                backgroundColor: const Color(0xFFECFDF5),
+                child: Text(
+                  user.firstName.characters.first.toUpperCase(),
+                  style: const TextStyle(
+                    color: Color(0xFF047857),
+                    fontSize: 25,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                user.fullName,
+                style: const TextStyle(
+                  color: _darkText,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                user.email,
+                style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: onLogout,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFFDC2626),
+                    side: const BorderSide(color: Color(0xFFFECACA)),
+                    padding: const EdgeInsets.symmetric(vertical: 13),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.logout_rounded, size: 19),
+                  label: const Text(
+                    'Sign out',
+                    style: TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -80,104 +80,96 @@ class _HomeScreenState extends State<HomeScreen> {
             parent: BouncingScrollPhysics(),
           ),
           slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
-            sliver: SliverList.list(
-              children: [
-                const SizedBox(height: 8),
-                const _HeroBadge(),
-                const SizedBox(height: 18),
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: const TextSpan(
-                    style: TextStyle(
-                      color: _ink,
-                      fontSize: 32,
-                      fontWeight: FontWeight.w800,
-                      height: 1.15,
-                      letterSpacing: -1,
-                    ),
-                    children: [
-                      TextSpan(text: 'Find your next role with '),
-                      TextSpan(
-                        text: 'AI precision',
-                        style: TextStyle(color: _emeraldDark),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 28),
+              sliver: SliverList.list(
+                children: [
+                  const SizedBox(height: 8),
+                  const _HeroBadge(),
+                  const SizedBox(height: 18),
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: const TextSpan(
+                      style: TextStyle(
+                        color: _ink,
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        height: 1.15,
+                        letterSpacing: -1,
                       ),
-                    ],
+                      children: [
+                        TextSpan(text: 'Find your next role with '),
+                        TextSpan(
+                          text: 'AI precision',
+                          style: TextStyle(color: _emeraldDark),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 14),
-                const Text(
-                  'Discover verified technical roles from registered employers, matched to your skills.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: _bodyText,
-                    fontSize: 14,
-                    height: 1.55,
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Discover verified technical roles from registered employers, matched to your skills.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: _bodyText,
+                      fontSize: 14,
+                      height: 1.55,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 22),
-                _SearchField(
-                  onSearch: (query) => _loadJobs(search: query, showAll: true),
-                ),
-                const SizedBox(height: 18),
-                _TrustHighlights(
-                  activeJobs: _jobs.length,
-                  isLoading: _isLoading,
-                ),
-                const SizedBox(height: 32),
-                const _FeatureStrip(),
-                const SizedBox(height: 34),
-                _SectionHeader(
-                  title: 'Top live opportunities',
-                  subtitle: 'FEATURED ROLES',
-                  actionLabel: _showAll ? null : 'View all',
-                  onAction: () => _loadJobs(showAll: true),
-                ),
-                const SizedBox(height: 14),
-                if (_isLoading) const _JobsLoadingState(),
-                if (!_isLoading && _error != null)
-                  _JobsErrorState(
-                    message: _error!,
-                    onRetry: _loadJobs,
+                  const SizedBox(height: 22),
+                  _SearchField(
+                    onSearch: (query) =>
+                        _loadJobs(search: query, showAll: true),
                   ),
-                if (!_isLoading && _error == null && _jobs.isEmpty)
-                  _JobsEmptyState(hasSearch: _searchQuery.isNotEmpty),
-                if (!_isLoading && _error == null)
-                  ..._jobs.map(
-                  (job) => Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: _JobCard(
-                      job: job,
-                      isSaved: _savedJobIds.contains(job.id),
-                      onSave: () {
-                        setState(() {
-                          if (!_savedJobIds.add(job.id)) {
-                            _savedJobIds.remove(job.id);
-                          }
-                        });
-                      },
-                      onView: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => JobViewScreen(initialJob: job),
+                  const SizedBox(height: 18),
+                  _TrustHighlights(
+                    activeJobs: _jobs.length,
+                    isLoading: _isLoading,
+                  ),
+                  const SizedBox(height: 32),
+                  const _FeatureStrip(),
+                  const SizedBox(height: 34),
+                  _SectionHeader(
+                    title: 'Top live opportunities',
+                    subtitle: 'FEATURED ROLES',
+                    actionLabel: _showAll ? null : 'View all',
+                    onAction: () => _loadJobs(showAll: true),
+                  ),
+                  const SizedBox(height: 14),
+                  if (_isLoading) const _JobsLoadingState(),
+                  if (!_isLoading && _error != null)
+                    _JobsErrorState(message: _error!, onRetry: _loadJobs),
+                  if (!_isLoading && _error == null && _jobs.isEmpty)
+                    _JobsEmptyState(hasSearch: _searchQuery.isNotEmpty),
+                  if (!_isLoading && _error == null)
+                    ..._jobs.map(
+                      (job) => Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: _JobCard(
+                          job: job,
+                          isSaved: _savedJobIds.contains(job.id),
+                          onSave: () {
+                            setState(() {
+                              if (!_savedJobIds.add(job.id)) {
+                                _savedJobIds.remove(job.id);
+                              }
+                            });
+                          },
+                          onView: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => JobViewScreen(initialJob: job),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           ],
         ),
       ),
     );
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -302,7 +294,9 @@ class _TrustHighlights extends StatelessWidget {
       spacing: 14,
       runSpacing: 8,
       children: [
-        _TrustItem(label: isLoading ? 'Loading roles...' : '$activeJobs active roles'),
+        _TrustItem(
+          label: isLoading ? 'Loading roles...' : '$activeJobs active roles',
+        ),
         const _TrustItem(label: 'AI matching'),
         const _TrustItem(label: 'Direct employers'),
       ],
@@ -339,9 +333,21 @@ class _FeatureStrip extends StatelessWidget {
   const _FeatureStrip();
 
   static const _features = [
-    (Icons.track_changes_rounded, 'AI Match Scoring', 'Roles ranked against your skills.'),
-    (Icons.bolt_rounded, 'Instant Applications', 'Apply directly without middlemen.'),
-    (Icons.trending_up_rounded, 'Real-time Tracking', 'Follow every application update.'),
+    (
+      Icons.track_changes_rounded,
+      'AI Match Scoring',
+      'Roles ranked against your skills.',
+    ),
+    (
+      Icons.bolt_rounded,
+      'Instant Applications',
+      'Apply directly without middlemen.',
+    ),
+    (
+      Icons.trending_up_rounded,
+      'Real-time Tracking',
+      'Follow every application update.',
+    ),
   ];
 
   @override
@@ -577,7 +583,9 @@ class _JobCard extends StatelessWidget {
                 onPressed: onSave,
                 visualDensity: VisualDensity.compact,
                 icon: Icon(
-                  isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+                  isSaved
+                      ? Icons.bookmark_rounded
+                      : Icons.bookmark_border_rounded,
                   color: isSaved ? _emerald : _bodyText,
                 ),
               ),
@@ -602,7 +610,10 @@ class _JobCard extends StatelessWidget {
             children: job.detailTags
                 .map(
                   (skill) => Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF8FAFC),
                       borderRadius: BorderRadius.circular(8),
@@ -650,7 +661,10 @@ class _JobCard extends StatelessWidget {
                   backgroundColor: _emerald,
                   foregroundColor: Colors.white,
                   elevation: 0,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(11),
                   ),
@@ -685,10 +699,7 @@ class _JobsLoadingState extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
           ),
           child: const Center(
-            child: CircularProgressIndicator(
-              color: _emerald,
-              strokeWidth: 2.5,
-            ),
+            child: CircularProgressIndicator(color: _emerald, strokeWidth: 2.5),
           ),
         ),
       ),

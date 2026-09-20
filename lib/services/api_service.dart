@@ -34,6 +34,37 @@ class ApiService {
     }
   }
 
+  Future<dynamic> postJson(
+    String path, {
+    required Map<String, dynamic> body,
+    String? bearerToken,
+  }) async {
+    final uri = ApiConfig.endpoint(path);
+    final headers = <String, String>{
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+      if (bearerToken != null) 'Authorization': 'Bearer $bearerToken',
+    };
+
+    try {
+      final response = await _client
+          .post(uri, headers: headers, body: jsonEncode(body))
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw ApiException(_serverMessage(response), response.statusCode);
+      }
+
+      return jsonDecode(response.body);
+    } on ApiException {
+      rethrow;
+    } catch (_) {
+      throw const ApiException(
+        'Unable to connect to Skill Hub. Check that the backend is running.',
+      );
+    }
+  }
+
   void dispose() => _client.close();
 
   String _serverMessage(http.Response response) {
