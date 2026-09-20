@@ -18,6 +18,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        // InkSparkle uses a runtime fragment shader that is unreliable on
+        // some Android emulators and older GPU drivers. InkRipple keeps the
+        // same Material interaction without requiring shader compilation.
+        splashFactory: InkRipple.splashFactory,
         scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSeed(
           seedColor: emerald,
