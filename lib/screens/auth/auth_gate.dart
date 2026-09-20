@@ -58,6 +58,10 @@ class _AuthGateState extends State<AuthGate> {
         onAuthenticated: (session) => setState(() => _session = session),
       );
     }
-    return CandidateMainScaffold(user: _session!.user, onLogout: _logout);
+    return CandidateMainScaffold(
+      user: _session!.user,
+      token: _session!.token,
+      onLogout: _logout,
+    );
   }
 }

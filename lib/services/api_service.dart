@@ -12,12 +12,19 @@ class ApiService {
   Future<dynamic> getJson(
     String path, {
     Map<String, String>? queryParameters,
+    String? bearerToken,
   }) async {
     final uri = ApiConfig.endpoint(path, queryParameters: queryParameters);
 
     try {
       final response = await _client
-          .get(uri, headers: const {'Accept': 'application/json'})
+          .get(
+            uri,
+            headers: {
+              'Accept': 'application/json',
+              if (bearerToken != null) 'Authorization': 'Bearer $bearerToken',
+            },
+          )
           .timeout(const Duration(seconds: 15));
 
       if (response.statusCode < 200 || response.statusCode >= 300) {

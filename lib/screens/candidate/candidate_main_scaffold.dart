@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../models/auth_session.dart';
+import 'applied_jobs_screen.dart';
 import 'candidate_home_screen.dart';
 
 const Color _emerald = Color(0xFF10B981);
@@ -21,10 +22,12 @@ class CandidateMainScaffold extends StatefulWidget {
   const CandidateMainScaffold({
     super.key,
     required this.user,
+    required this.token,
     required this.onLogout,
   });
 
   final CandidateUser user;
+  final String token;
   final Future<void> Function() onLogout;
 
   @override
@@ -60,7 +63,11 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
       const HomeScreen(),
       const AssessmentsScreen(),
       const InterviewsScreen(),
-      AccountScreen(user: widget.user, onLogout: widget.onLogout),
+      AccountScreen(
+        user: widget.user,
+        token: widget.token,
+        onLogout: widget.onLogout,
+      ),
     ];
     return Scaffold(
       backgroundColor: Colors.white,
@@ -336,9 +343,15 @@ class InterviewsScreen extends StatelessWidget {
 }
 
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({super.key, required this.user, required this.onLogout});
+  const AccountScreen({
+    super.key,
+    required this.user,
+    required this.token,
+    required this.onLogout,
+  });
 
   final CandidateUser user;
+  final String token;
   final Future<void> Function() onLogout;
 
   @override
@@ -463,14 +476,7 @@ class AccountScreen extends StatelessWidget {
           icon: Icons.work_outline_rounded,
           title: 'Applied Jobs',
           subtitle: 'Track your submitted job applications',
-          onTap: () => _open(
-            context,
-            const _AccountDestinationPage(
-              title: 'Applied Jobs',
-              icon: Icons.work_outline_rounded,
-              message: 'Your submitted job applications will appear here.',
-            ),
-          ),
+          onTap: () => _open(context, AppliedJobsScreen(token: token)),
         ),
         const SizedBox(height: 10),
         _AccountMenuCard(

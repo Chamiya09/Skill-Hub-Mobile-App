@@ -230,51 +230,32 @@ class _HeroCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _Logo(job: job, size: 58),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            job.companyName,
-                            style: const TextStyle(
-                              color: _ink,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
+                    Flexible(
+                      child: Text(
+                        job.companyName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: _ink,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
                         ),
-                        const SizedBox(width: 6),
-                        const Icon(
-                          Icons.verified_rounded,
-                          color: Color(0xFF2563EB),
-                          size: 17,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 7),
-                    Text(
-                      job.title,
-                      style: const TextStyle(
-                        color: _ink,
-                        fontSize: 23,
-                        height: 1.2,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: -0.5,
                       ),
+                    ),
+                    const SizedBox(width: 5),
+                    const Icon(
+                      Icons.verified_rounded,
+                      color: Color(0xFF2563EB),
+                      size: 17,
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
+              const SizedBox(width: 8),
               _HeaderActionButton(
                 tooltip: saved ? 'Remove saved job' : 'Save job',
                 icon: saved
@@ -282,14 +263,27 @@ class _HeroCard extends StatelessWidget {
                     : Icons.bookmark_border_rounded,
                 active: saved,
                 onTap: onSave,
+                size: 38,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
               _HeaderActionButton(
                 tooltip: 'Share job',
                 icon: Icons.ios_share_rounded,
                 onTap: onShare,
+                size: 38,
               ),
             ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            job.title,
+            style: const TextStyle(
+              color: _ink,
+              fontSize: 23,
+              height: 1.2,
+              fontWeight: FontWeight.w900,
+              letterSpacing: -0.5,
+            ),
           ),
           const SizedBox(height: 19),
           Wrap(
@@ -379,12 +373,14 @@ class _HeaderActionButton extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.active = false,
+    this.size = 42,
   });
 
   final String tooltip;
   final IconData icon;
   final VoidCallback onTap;
   final bool active;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -397,8 +393,8 @@ class _HeaderActionButton extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(11),
           child: Container(
-            width: 42,
-            height: 42,
+            width: size,
+            height: size,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(11),
               border: Border.all(
