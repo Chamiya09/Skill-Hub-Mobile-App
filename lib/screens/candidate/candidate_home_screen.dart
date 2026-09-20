@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
+import 'job_view_screen.dart';
 
 const _emerald = Color(0xFF10B981);
 const _emeraldDark = Color(0xFF047857);
@@ -156,7 +157,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
                         });
                       },
-                      onView: () => _showMessage('${job.title} selected.'),
+                      onView: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => JobViewScreen(initialJob: job),
+                        ),
+                      ),
                     ),
                   ),
                 ),

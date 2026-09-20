@@ -10,6 +10,11 @@ class Job {
     required this.experienceLevel,
     required this.salaryRange,
     required this.createdAt,
+    this.status = 'Active',
+    this.description = '',
+    this.whatWeOffer,
+    this.tags = const [],
+    this.logoUrl,
   });
 
   factory Job.fromJson(Map<String, dynamic> json) {
@@ -24,6 +29,16 @@ class Job {
       experienceLevel: _string(json['experienceLevel']),
       salaryRange: _nullableString(json['salaryRange']),
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
+      status: _string(json['status'], fallback: 'Active'),
+      description: _string(json['description']),
+      whatWeOffer: _nullableString(json['whatWeOffer']),
+      tags: json['tags'] is List
+          ? (json['tags'] as List)
+              .map((tag) => tag.toString().trim())
+              .where((tag) => tag.isNotEmpty)
+              .toList(growable: false)
+          : const [],
+      logoUrl: _nullableString(json['logoUrl']),
     );
   }
 
@@ -37,6 +52,21 @@ class Job {
   final String experienceLevel;
   final String? salaryRange;
   final DateTime? createdAt;
+  final String status;
+  final String description;
+  final String? whatWeOffer;
+  final List<String> tags;
+  final String? logoUrl;
+
+  String get postedDateLabel {
+    if (createdAt == null) return 'Recently posted';
+    final date = createdAt!.toLocal();
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
 
   String get companyInitials {
     final words = companyName.trim().split(RegExp(r'\s+'));

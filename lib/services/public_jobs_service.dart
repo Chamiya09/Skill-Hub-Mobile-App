@@ -36,6 +36,22 @@ class PublicJobsService {
     }
   }
 
+  Future<Job> getJobById(String id) async {
+    try {
+      final decoded = await _apiService.getJson('public/jobs/$id');
+      if (decoded is! Map<String, dynamic>) {
+        throw const JobsApiException(
+          'The server returned an invalid job response.',
+        );
+      }
+      return Job.fromJson(decoded);
+    } on JobsApiException {
+      rethrow;
+    } on ApiException catch (error) {
+      throw JobsApiException(error.message);
+    }
+  }
+
   void dispose() => _apiService.dispose();
 }
 
