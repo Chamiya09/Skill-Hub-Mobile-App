@@ -58,7 +58,7 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
   Widget build(BuildContext context) {
     final screens = <Widget>[
       const HomeScreen(),
-      const AppliedJobsScreen(),
+      const AssessmentsScreen(),
       const InterviewsScreen(),
       AccountScreen(user: widget.user, onLogout: widget.onLogout),
     ];
@@ -150,9 +150,9 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
                 label: 'Home',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.work_outline),
-                activeIcon: Icon(Icons.work_rounded),
-                label: 'Applied Jobs',
+                icon: Icon(Icons.assignment_outlined),
+                activeIcon: Icon(Icons.assignment_rounded),
+                label: 'Assessment',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.calendar_today_outlined),
@@ -172,15 +172,15 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
   }
 }
 
-class AppliedJobsScreen extends StatelessWidget {
-  const AppliedJobsScreen({super.key});
+class AssessmentsScreen extends StatelessWidget {
+  const AssessmentsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const _PlaceholderScreen(
-      icon: Icons.work_outline,
-      title: 'Applied Jobs',
-      description: 'Track your applications and their progress.',
+      icon: Icons.assignment_outlined,
+      title: 'Assessments',
+      description: 'View assigned assessments and track your results.',
     );
   }
 }
