@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
+import 'company_details_screen.dart';
 
 const _emerald = Color(0xFF10B981);
 const _emeraldDark = Color(0xFF047857);
@@ -155,10 +156,6 @@ class _JobViewScreenState extends State<JobViewScreen> {
               onShare: () => _message('Job sharing will be available soon.'),
             ),
             const SizedBox(height: 16),
-            _MatchCard(
-              onTap: () => _message('AI match analysis is coming soon.'),
-            ),
-            const SizedBox(height: 16),
             _JobContentCard(
               eyebrow: 'JOB DESCRIPTION',
               title: 'About the Role',
@@ -180,7 +177,18 @@ class _JobViewScreenState extends State<JobViewScreen> {
             const SizedBox(height: 16),
             _OverviewCard(job: _job),
             const SizedBox(height: 16),
-            _CompanyCard(job: _job),
+            _CompanyCard(
+              job: _job,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => CompanyDetailsScreen(
+                    identifier: _job.companyId.isNotEmpty
+                        ? _job.companyId
+                        : _job.companyName,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 18),
             _ApplyCard(
               job: _job,
@@ -431,61 +439,6 @@ class _HeaderActionButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MatchCard extends StatelessWidget {
-  const _MatchCard({required this.onTap});
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => Material(
-    color: const Color(0xFFECFDF5),
-    borderRadius: BorderRadius.circular(18),
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFA7F3D0)),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: const Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                color: _emeraldDark,
-                size: 20,
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Analyze my match',
-                    style: TextStyle(
-                      color: _emeraldDark,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'See how your Digital CV fits this role',
-                    style: TextStyle(color: Color(0xFF3F6F60), fontSize: 11),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_rounded, color: _emeraldDark, size: 20),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class _ContentCard extends StatelessWidget {
@@ -804,51 +757,60 @@ class _OverviewRow extends StatelessWidget {
 }
 
 class _CompanyCard extends StatelessWidget {
-  const _CompanyCard({required this.job});
+  const _CompanyCard({required this.job, required this.onTap});
   final Job job;
+  final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => _Card(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    borderRadius: BorderRadius.circular(20),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: _Card(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Logo(job: job, size: 44),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    job.companyName,
-                    style: const TextStyle(
-                      color: _ink,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
+            Row(
+              children: [
+                _Logo(job: job, size: 44),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        job.companyName,
+                        style: const TextStyle(
+                          color: _ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Verified organization',
+                        style: TextStyle(color: _body, fontSize: 11),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Verified organization',
-                    style: TextStyle(color: _body, fontSize: 11),
-                  ),
-                ],
-              ),
+                ),
+                const Icon(
+                  Icons.verified_rounded,
+                  color: Color(0xFF2563EB),
+                  size: 20,
+                ),
+              ],
             ),
-            const Icon(
-              Icons.verified_rounded,
-              color: Color(0xFF2563EB),
-              size: 20,
+            const SizedBox(height: 13),
+            Text(
+              '${job.companyName} is actively hiring through Skill Hub’s verified technical talent network.',
+              style: const TextStyle(color: _body, fontSize: 13, height: 1.5),
             ),
           ],
         ),
-        const SizedBox(height: 13),
-        Text(
-          '${job.companyName} is actively hiring through Skill Hub’s verified technical talent network.',
-          style: const TextStyle(color: _body, fontSize: 13, height: 1.5),
-        ),
-      ],
+      ),
     ),
   );
 }
