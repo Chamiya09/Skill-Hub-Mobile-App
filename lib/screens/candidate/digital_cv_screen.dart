@@ -48,21 +48,69 @@ class _DigitalCvScreenState extends State<DigitalCvScreen> {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'My Digital CV',
-          style: TextStyle(
-            color: _ink,
-            fontSize: 19,
-            fontWeight: FontWeight.w800,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 76,
+        leadingWidth: 62,
+        titleSpacing: 10,
+        shape: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14, top: 14, bottom: 14),
+          child: Material(
+            color: _surface,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: _border),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: Color(0xFF334155),
+                  size: 21,
+                ),
+              ),
+            ),
           ),
         ),
-        actions: [
-          IconButton(
-            tooltip: 'Refresh CV',
-            onPressed: _refresh,
-            icon: const Icon(Icons.refresh_rounded, color: _ink),
-          ),
-        ],
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'CAREER PROFILE',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _emerald,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'My Digital CV',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _ink,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 11),
+            _DigitalCvTitleIcon(),
+          ],
+        ),
       ),
       body: FutureBuilder<CandidateCvProfile>(
         future: _profileFuture,
@@ -197,6 +245,32 @@ class _DigitalCvScreenState extends State<DigitalCvScreen> {
       ),
     );
   }
+}
+
+class _DigitalCvTitleIcon extends StatelessWidget {
+  const _DigitalCvTitleIcon();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 42,
+    height: 42,
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [_emerald, _emeraldDark],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(13),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x3310B981),
+          blurRadius: 12,
+          offset: Offset(0, 5),
+        ),
+      ],
+    ),
+    child: const Icon(Icons.badge_outlined, color: Colors.white, size: 21),
+  );
 }
 
 class _ProfileHero extends StatelessWidget {
@@ -706,7 +780,6 @@ class _ErrorState extends StatelessWidget {
     child: Padding(
       padding: const EdgeInsets.all(28),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(Icons.cloud_off_rounded, color: _body, size: 48),
           const SizedBox(height: 12),
