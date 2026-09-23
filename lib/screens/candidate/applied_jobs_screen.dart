@@ -217,9 +217,19 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: _border),
+      gradient: const LinearGradient(
+        colors: [Color(0xFF047857), Color(0xFF10B981)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x3310B981),
+          blurRadius: 18,
+          offset: Offset(0, 7),
+        ),
+      ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,13 +237,13 @@ class _Hero extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
           decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
+            color: const Color(0x26FFFFFF),
             borderRadius: BorderRadius.circular(7),
           ),
           child: const Text(
             'APPLICATION TRACKER',
             style: TextStyle(
-              color: _emeraldDark,
+              color: Colors.white,
               fontSize: 9,
               fontWeight: FontWeight.w900,
               letterSpacing: .7,
@@ -244,7 +254,7 @@ class _Hero extends StatelessWidget {
         const Text(
           'Applied Positions',
           style: TextStyle(
-            color: _ink,
+            color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.w900,
             letterSpacing: -.6,
@@ -253,7 +263,11 @@ class _Hero extends StatelessWidget {
         const SizedBox(height: 6),
         const Text(
           'Review every application and open its complete hiring journey.',
-          style: TextStyle(color: _muted, fontSize: 12.5, height: 1.5),
+          style: TextStyle(
+            color: Color(0xE6FFFFFF),
+            fontSize: 12.5,
+            height: 1.5,
+          ),
         ),
         const SizedBox(height: 16),
         Row(
@@ -261,14 +275,14 @@ class _Hero extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: const Color(0x26FFFFFF),
                 borderRadius: BorderRadius.circular(9),
-                border: Border.all(color: _border),
+                border: Border.all(color: const Color(0x33FFFFFF)),
               ),
               child: Text(
                 '$count active ${count == 1 ? 'application' : 'applications'}',
                 style: const TextStyle(
-                  color: _ink,
+                  color: Colors.white,
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                 ),
@@ -277,6 +291,7 @@ class _Hero extends StatelessWidget {
             const Spacer(),
             TextButton.icon(
               onPressed: onExplore,
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
               icon: const Icon(Icons.search_rounded, size: 17),
               label: const Text(
                 'Explore Jobs',
@@ -467,7 +482,7 @@ class _ProgressSheet extends StatelessWidget {
                   height: 4,
                   decoration: BoxDecoration(
                     color: const Color(0xFFCBD5E1),
-                    borderRadius: BorderRadius.circular(99),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               ),

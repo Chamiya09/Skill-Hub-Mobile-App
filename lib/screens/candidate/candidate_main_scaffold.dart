@@ -365,48 +365,43 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       children: [
-        const Text(
-          'My Account',
-          style: TextStyle(
-            color: _darkText,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
-        ),
-        const SizedBox(height: 5),
-        const Text(
-          'Manage your career profile and job activity.',
-          style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-        ),
-        const SizedBox(height: 18),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF047857), Color(0xFF10B981)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(22),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x080F172A),
+                color: Color(0x3310B981),
                 blurRadius: 18,
-                offset: Offset(0, 6),
+                offset: Offset(0, 7),
               ),
             ],
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 31,
-                backgroundColor: const Color(0xFFECFDF5),
-                child: Text(
-                  user.firstName.characters.first.toUpperCase(),
-                  style: const TextStyle(
-                    color: Color(0xFF047857),
-                    fontSize: 25,
-                    fontWeight: FontWeight.w800,
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: const Color(0x26FFFFFF),
+                  borderRadius: BorderRadius.circular(17),
+                  border: Border.all(color: const Color(0x33FFFFFF)),
+                ),
+                child: Center(
+                  child: Text(
+                    user.firstName.characters.first.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),
@@ -420,9 +415,9 @@ class AccountScreen extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: _darkText,
+                        color: Colors.white,
                         fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -431,7 +426,7 @@ class AccountScreen extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Color(0xFF64748B),
+                        color: Color(0xD9FFFFFF),
                         fontSize: 12,
                       ),
                     ),
@@ -442,13 +437,14 @@ class AccountScreen extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFECFDF5),
+                        color: const Color(0x26FFFFFF),
                         borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: const Color(0x33FFFFFF)),
                       ),
                       child: const Text(
                         'VERIFIED CANDIDATE',
                         style: TextStyle(
-                          color: Color(0xFF047857),
+                          color: Colors.white,
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.5,

@@ -221,8 +221,23 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _Card(
+    return Container(
       padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF047857), Color(0xFF10B981)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x3310B981),
+            blurRadius: 18,
+            offset: Offset(0, 7),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -240,7 +255,7 @@ class _HeroCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: _ink,
+                          color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
                         ),
@@ -278,7 +293,7 @@ class _HeroCard extends StatelessWidget {
           Text(
             job.title,
             style: const TextStyle(
-              color: _ink,
+              color: Colors.white,
               fontSize: 23,
               height: 1.2,
               fontWeight: FontWeight.w900,
@@ -290,12 +305,21 @@ class _HeroCard extends StatelessWidget {
             spacing: 14,
             runSpacing: 10,
             children: [
-              _Meta(icon: Icons.location_on_outlined, text: job.location),
-              _Meta(icon: Icons.schedule_rounded, text: job.employmentType),
+              _Meta(
+                icon: Icons.location_on_outlined,
+                text: job.location,
+                light: true,
+              ),
+              _Meta(
+                icon: Icons.schedule_rounded,
+                text: job.employmentType,
+                light: true,
+              ),
               if (job.experienceLevel.isNotEmpty)
                 _Meta(
                   icon: Icons.business_center_outlined,
                   text: job.experienceLevel,
+                  light: true,
                 ),
             ],
           ),
@@ -316,14 +340,14 @@ class _HeroCard extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
+                            color: const Color(0x26FFFFFF),
                             borderRadius: BorderRadius.circular(7),
-                            border: Border.all(color: _border),
+                            border: Border.all(color: const Color(0x33FFFFFF)),
                           ),
                           child: Text(
                             tag,
                             style: const TextStyle(
-                              color: Color(0xFF334155),
+                              color: Colors.white,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
@@ -929,19 +953,20 @@ class _Logo extends StatelessWidget {
 }
 
 class _Meta extends StatelessWidget {
-  const _Meta({required this.icon, required this.text});
+  const _Meta({required this.icon, required this.text, this.light = false});
   final IconData icon;
   final String text;
+  final bool light;
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(icon, size: 16, color: _body),
+      Icon(icon, size: 16, color: light ? const Color(0xE6FFFFFF) : _body),
       const SizedBox(width: 5),
       Text(
         text,
-        style: const TextStyle(
-          color: _body,
+        style: TextStyle(
+          color: light ? const Color(0xE6FFFFFF) : _body,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),

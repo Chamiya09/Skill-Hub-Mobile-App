@@ -231,9 +231,19 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(20),
     decoration: BoxDecoration(
-      gradient: const LinearGradient(colors: [Colors.white, Color(0xFFEFFCF7)]),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: const Color(0xFFDCE7E3)),
+      gradient: const LinearGradient(
+        colors: [Color(0xFF047857), Color(0xFF10B981)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x3310B981),
+          blurRadius: 18,
+          offset: Offset(0, 7),
+        ),
+      ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,23 +251,23 @@ class _Hero extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
+            color: const Color(0x26FFFFFF),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFA7F3D0)),
+            border: Border.all(color: const Color(0x33FFFFFF)),
           ),
           child: const Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.bookmark_border_rounded,
-                color: _emeraldDark,
+                color: Colors.white,
                 size: 14,
               ),
               SizedBox(width: 6),
               Text(
                 'SAVED BOOKMARKS',
                 style: TextStyle(
-                  color: _emeraldDark,
+                  color: Colors.white,
                   fontSize: 9,
                   fontWeight: FontWeight.w900,
                   letterSpacing: .7,
@@ -270,7 +280,7 @@ class _Hero extends StatelessWidget {
         const Text(
           'Saved Jobs',
           style: TextStyle(
-            color: _ink,
+            color: Colors.white,
             fontSize: 25,
             fontWeight: FontWeight.w900,
             letterSpacing: -.7,
@@ -279,20 +289,24 @@ class _Hero extends StatelessWidget {
         const SizedBox(height: 6),
         const Text(
           'Keep promising opportunities organised and return when you are ready to apply.',
-          style: TextStyle(color: _muted, fontSize: 12.5, height: 1.55),
+          style: TextStyle(
+            color: Color(0xE6FFFFFF),
+            fontSize: 12.5,
+            height: 1.55,
+          ),
         ),
         const SizedBox(height: 16),
         Row(
           children: [
             Text.rich(
               TextSpan(
-                style: const TextStyle(color: _muted, fontSize: 11),
+                style: const TextStyle(color: Color(0xD9FFFFFF), fontSize: 11),
                 children: [
                   TextSpan(text: 'Private to your account  •  '),
                   TextSpan(
                     text: '$count saved',
                     style: const TextStyle(
-                      color: _emeraldDark,
+                      color: Colors.white,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -302,6 +316,7 @@ class _Hero extends StatelessWidget {
             const Spacer(),
             TextButton.icon(
               onPressed: onBrowse,
+              style: TextButton.styleFrom(foregroundColor: Colors.white),
               icon: const Icon(Icons.search_rounded, size: 17),
               label: const Text(
                 'Browse Jobs',
