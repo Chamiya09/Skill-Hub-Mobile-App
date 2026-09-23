@@ -98,13 +98,9 @@ class _DigitalCvScreenState extends State<DigitalCvScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         if (profile.summary?.isNotEmpty == true)
-                          Text(
-                            profile.summary!,
-                            style: const TextStyle(
-                              color: _body,
-                              fontSize: 13,
-                              height: 1.55,
-                            ),
+                          _DescriptionPoints(
+                            description: profile.summary!,
+                            label: 'Description',
                           ),
                         if (profile.highlights.isNotEmpty) ...[
                           const SizedBox(height: 14),
@@ -510,55 +506,68 @@ class _TimelineTile extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                if (period?.isNotEmpty == true)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 3),
-                    child: Text(
-                      period!,
-                      style: const TextStyle(color: _body, fontSize: 11),
-                    ),
-                  ),
-                if (points.isNotEmpty) ...[
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Description',
-                    style: TextStyle(
-                      color: _ink,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  ...points.map(
-                    (point) => Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(top: 6, right: 7),
-                            child: Icon(Icons.circle, color: _emerald, size: 5),
-                          ),
-                          Expanded(
-                            child: Text(
-                              point,
-                              style: const TextStyle(
-                                color: _body,
-                                fontSize: 12,
-                                height: 1.45,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+                if (points.isNotEmpty)
+                  _DescriptionPoints(description: description!),
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DescriptionPoints extends StatelessWidget {
+  const _DescriptionPoints({
+    required this.description,
+    this.label = 'Description',
+  });
+
+  final String description;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final points = _descriptionPoints(description);
+    if (points.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: _ink,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 4),
+        ...points.map(
+          (point) => Padding(
+            padding: const EdgeInsets.only(bottom: 5),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 6, right: 7),
+                  child: Icon(Icons.circle, color: _emerald, size: 5),
+                ),
+                Expanded(
+                  child: Text(
+                    point,
+                    style: const TextStyle(
+                      color: _body,
+                      fontSize: 12,
+                      height: 1.45,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
