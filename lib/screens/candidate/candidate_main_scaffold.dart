@@ -6,6 +6,7 @@ import '../../models/auth_session.dart';
 import 'applied_jobs_screen.dart';
 import 'saved_jobs_screen.dart';
 import 'candidate_home_screen.dart';
+import 'digital_cv_screen.dart';
 
 const Color _emerald = Color(0xFF10B981);
 const Color _darkText = Color(0xFF1F2937);
@@ -473,7 +474,7 @@ class AccountScreen extends StatelessWidget {
           icon: Icons.badge_outlined,
           title: 'My Digital CV',
           subtitle: 'Manage your verified professional profile',
-          onTap: () => _open(context, const _BlankDigitalCvPage()),
+          onTap: () => _open(context, DigitalCvScreen(token: token)),
         ),
         const SizedBox(height: 10),
         _AccountMenuCard(
@@ -589,29 +590,6 @@ class _AccountMenuCard extends StatelessWidget {
               ),
               const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BlankDigitalCvPage extends StatelessWidget {
-  const _BlankDigitalCvPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'My Digital CV',
-          style: TextStyle(
-            color: _darkText,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
           ),
         ),
       ),
