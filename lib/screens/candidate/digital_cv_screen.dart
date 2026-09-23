@@ -472,68 +472,124 @@ class _TimelineTile extends StatelessWidget {
   final String? period;
   final String? description;
   @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 15),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
-            borderRadius: BorderRadius.circular(10),
+  Widget build(BuildContext context) {
+    final points = _descriptionPoints(description);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: _emeraldDark, size: 17),
           ),
-          child: Icon(icon, color: _emeraldDark, size: 17),
-        ),
-        const SizedBox(width: 11),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: _ink,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 3),
-              Text(
-                subtitle,
-                style: const TextStyle(
-                  color: _emeraldDark,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              if (period?.isNotEmpty == true)
-                Padding(
-                  padding: const EdgeInsets.only(top: 3),
-                  child: Text(
-                    period!,
-                    style: const TextStyle(color: _body, fontSize: 11),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: _ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-              if (description?.isNotEmpty == true)
-                Padding(
-                  padding: const EdgeInsets.only(top: 7),
-                  child: Text(
-                    description!,
-                    style: const TextStyle(
-                      color: _body,
-                      fontSize: 12,
-                      height: 1.45,
+                const SizedBox(height: 3),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: _emeraldDark,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                if (period?.isNotEmpty == true)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3),
+                    child: Text(
+                      period!,
+                      style: const TextStyle(color: _body, fontSize: 11),
                     ),
                   ),
-                ),
-            ],
+                if (points.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Description',
+                    style: TextStyle(
+                      color: _ink,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  ...points.map(
+                    (point) => Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(top: 6, right: 7),
+                            child: Icon(Icons.circle, color: _emerald, size: 5),
+                          ),
+                          Expanded(
+                            child: Text(
+                              point,
+                              style: const TextStyle(
+                                color: _body,
+                                fontSize: 12,
+                                height: 1.45,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
+}
+
+List<String> _descriptionPoints(String? rawDescription) {
+  if (rawDescription == null || rawDescription.trim().isEmpty) return const [];
+
+  var text = rawDescription
+      .replaceAll(RegExp(r'<br\s*/?>', caseSensitive: false), '\n')
+      .replaceAll(
+        RegExp(r'</?(li|p|div|h[1-6])[^>]*>', caseSensitive: false),
+        '\n',
+      )
+      .replaceAll(RegExp(r'<[^>]+>'), ' ')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&amp;', '&')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>');
+
+  final lines = text
+      .split(RegExp(r'\r?\n|[•▪●]'))
+      .map((line) => line.replaceFirst(RegExp(r'^\s*[-*]\s*'), '').trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
+
+  if (lines.length > 1) return lines;
+  return lines.first
+      .split(RegExp(r'(?<=[.!?])\s+(?=[A-Z0-9])'))
+      .map((line) => line.trim())
+      .where((line) => line.isNotEmpty)
+      .toList();
 }
 
 class _SkillChip extends StatelessWidget {
