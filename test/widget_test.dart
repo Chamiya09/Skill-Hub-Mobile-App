@@ -1,30 +1,45 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:skill_hub_mobile_app/main.dart';
+import 'package:skill_hub_mobile_app/config/api_config.dart';
+import 'package:skill_hub_mobile_app/models/job.dart';
+import 'package:skill_hub_mobile_app/screens/candidate/candidate_main_scaffold.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('maps the public jobs API response', () {
+    final job = Job.fromJson({
+      'id': 'job-1',
+      'companyId': 'company-1',
+      'companyName': 'Skill Hub Labs',
+      'title': 'Flutter Developer',
+      'department': 'Engineering',
+      'location': 'Colombo',
+      'employmentType': 'Full-time',
+      'experienceLevel': 'Mid Level',
+      'salaryRange': 'LKR 200K - 300K',
+      'createdAt': DateTime.now().toUtc().toIso8601String(),
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(job.title, 'Flutter Developer');
+    expect(job.companyInitials, 'SH');
+    expect(job.detailTags, ['Engineering', 'Mid Level']);
+    expect(job.salaryLabel, 'LKR 200K - 300K');
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  test('selects the greeting from the local time', () {
+    expect(candidateGreeting(DateTime(2026, 1, 1, 8)), 'Good Morning');
+    expect(candidateGreeting(DateTime(2026, 1, 1, 13)), 'Good Afternoon');
+    expect(candidateGreeting(DateTime(2026, 1, 1, 19)), 'Good Evening');
+    expect(candidateGreeting(DateTime(2026, 1, 1, 23)), 'Good Night');
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('builds an Android emulator API endpoint outside web', () {
+    final endpoint = ApiConfig.endpoint(
+      'public/jobs',
+      queryParameters: {'limit': '6'},
+    );
+
+    expect(
+      endpoint.toString(),
+      'http://10.0.2.2:5155/api/public/jobs?limit=6',
+    );
   });
 }
