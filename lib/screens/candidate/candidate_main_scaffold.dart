@@ -788,40 +788,86 @@ class _StudyRoleSelector extends StatelessWidget {
   final ValueChanged<int> onSelected;
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-    height: 43,
-    child: ListView.separated(
-      scrollDirection: Axis.horizontal,
-      itemCount: guides.length,
-      separatorBuilder: (_, _) => const SizedBox(width: 8),
-      itemBuilder: (context, index) {
-        final guide = guides[index];
-        final selected = index == selectedIndex;
-        return ChoiceChip(
-          selected: selected,
-          onSelected: (_) => onSelected(index),
-          avatar: Icon(
-            Icons.work_outline_rounded,
-            size: 16,
-            color: selected ? Colors.white : _emeraldDark,
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(13, 4, 8, 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: const Icon(
+              Icons.work_outline_rounded,
+              color: _emeraldDark,
+              size: 19,
+            ),
           ),
-          label: Text(guide.displayRole),
-          labelStyle: TextStyle(
-            color: selected ? Colors.white : _darkText,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
+          const SizedBox(width: 10),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: selectedIndex,
+                isExpanded: true,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: _emeraldDark,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                dropdownColor: Colors.white,
+                onChanged: (index) {
+                  if (index != null) onSelected(index);
+                },
+                items: [
+                  for (var index = 0; index < guides.length; index++)
+                    DropdownMenuItem<int>(
+                      value: index,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            guides[index].jobTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: _darkText,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            [
+                              guides[index].displayRole,
+                              if (guides[index].companyName?.isNotEmpty == true)
+                                guides[index].companyName!,
+                            ].join(' • '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
-          selectedColor: _emeraldDark,
-          backgroundColor: Colors.white,
-          side: BorderSide(
-            color: selected ? _emeraldDark : const Color(0xFFE2E8F0),
-          ),
-          showCheckmark: false,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
-        );
-      },
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 class _StudyRoleGuidelines extends StatelessWidget {
