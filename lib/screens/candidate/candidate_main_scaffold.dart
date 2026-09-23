@@ -478,6 +478,13 @@ class AccountScreen extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         _AccountMenuCard(
+          icon: Icons.school_outlined,
+          title: 'Study Dashboard',
+          subtitle: 'Prepare for assessments and interviews',
+          onTap: () => _open(context, const _StudyDashboardPage()),
+        ),
+        const SizedBox(height: 10),
+        _AccountMenuCard(
           icon: Icons.work_outline_rounded,
           title: 'Applied Jobs',
           subtitle: 'Track your submitted job applications',
@@ -595,6 +602,116 @@ class _AccountMenuCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StudyDashboardPage extends StatelessWidget {
+  const _StudyDashboardPage();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 76,
+        leadingWidth: 62,
+        titleSpacing: 10,
+        shape: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14, top: 14, bottom: 14),
+          child: Material(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: Color(0xFF334155),
+                  size: 21,
+                ),
+              ),
+            ),
+          ),
+        ),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'LEARNING HUB',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _emerald,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Study Dashboard',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _darkText,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 11),
+            _StudyTitleIcon(),
+          ],
+        ),
+      ),
+      body: const _PlaceholderScreen(
+        icon: Icons.school_outlined,
+        title: 'Study Dashboard',
+        description: 'Your assessment preparation tools and interview study plans will appear here.',
+      ),
+    );
+  }
+}
+
+class _StudyTitleIcon extends StatelessWidget {
+  const _StudyTitleIcon();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 42,
+    height: 42,
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [_emerald, Color(0xFF047857)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(13),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x3310B981),
+          blurRadius: 12,
+          offset: Offset(0, 5),
+        ),
+      ],
+    ),
+    child: const Icon(Icons.school_outlined, color: Colors.white, size: 21),
+  );
 }
 
 class _PlaceholderScreen extends StatelessWidget {
