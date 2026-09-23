@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../components/company_logo_button.dart';
 import '../../models/job.dart';
 import '../../models/saved_job.dart';
 import '../../services/saved_jobs_service.dart';
@@ -361,27 +362,14 @@ class _SavedJobCard extends StatelessWidget {
       children: [
         Row(
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              alignment: Alignment.center,
-              clipBehavior: Clip.antiAlias,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFECFDF5), Color(0xFFF0FDFA)],
-                ),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: const Color(0xFFA7F3D0)),
-              ),
-              child: job.companyLogoUrl?.isNotEmpty == true
-                  ? Image.network(
-                      job.companyLogoUrl!,
-                      fit: BoxFit.cover,
-                      width: 52,
-                      height: 52,
-                      errorBuilder: (_, _, _) => _Initials(job.companyInitials),
-                    )
-                  : _Initials(job.companyInitials),
+            CompanyLogoButton(
+              companyIdentifier: job.companyId.isNotEmpty
+                  ? job.companyId
+                  : job.companyName,
+              initials: job.companyInitials,
+              logoUrl: job.companyLogoUrl,
+              size: 52,
+              backgroundColor: const Color(0xFFECFDF5),
             ),
             const Spacer(),
             IconButton(
@@ -525,20 +513,6 @@ String _date(DateTime? date) {
   ];
   final local = date.toLocal();
   return '${months[local.month - 1]} ${local.day}, ${local.year}';
-}
-
-class _Initials extends StatelessWidget {
-  const _Initials(this.value);
-  final String value;
-  @override
-  Widget build(BuildContext context) => Text(
-    value.isEmpty ? 'SH' : value,
-    style: const TextStyle(
-      color: _emeraldDark,
-      fontSize: 15,
-      fontWeight: FontWeight.w900,
-    ),
-  );
 }
 
 class _Meta extends StatelessWidget {

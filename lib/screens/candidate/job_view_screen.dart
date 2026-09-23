@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../components/company_logo_button.dart';
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
 import 'company_details_screen.dart';
@@ -252,7 +253,15 @@ class _HeroCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Logo(job: job, size: 58),
+              CompanyLogoButton(
+                companyIdentifier: job.companyId.isNotEmpty
+                    ? job.companyId
+                    : job.companyName,
+                initials: job.companyInitials,
+                logoUrl: job.logoUrl,
+                size: 58,
+                backgroundColor: Colors.white,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Row(
@@ -774,7 +783,15 @@ class _CompanyCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                _Logo(job: job, size: 44),
+                CompanyLogoButton(
+                  companyIdentifier: job.companyId.isNotEmpty
+                      ? job.companyId
+                      : job.companyName,
+                  initials: job.companyInitials,
+                  logoUrl: job.logoUrl,
+                  size: 44,
+                  backgroundColor: const Color(0xFFECFDF5),
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -875,41 +892,6 @@ class _ApplyCard extends StatelessWidget {
           ),
         ),
       ],
-    ),
-  );
-}
-
-class _Logo extends StatelessWidget {
-  const _Logo({required this.job, required this.size});
-  final Job job;
-  final double size;
-  @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    alignment: Alignment.center,
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: const Color(0xFFD1FAE5),
-      borderRadius: BorderRadius.circular(size * .25),
-      border: Border.all(color: const Color(0xFFA7F3D0)),
-    ),
-    child: job.logoUrl != null
-        ? Image.network(
-            job.logoUrl!,
-            fit: BoxFit.cover,
-            width: size,
-            height: size,
-            errorBuilder: (_, _, _) => _initials(),
-          )
-        : _initials(),
-  );
-  Widget _initials() => Text(
-    job.companyInitials,
-    style: TextStyle(
-      color: const Color(0xFF065F46),
-      fontSize: size * .31,
-      fontWeight: FontWeight.w900,
     ),
   );
 }

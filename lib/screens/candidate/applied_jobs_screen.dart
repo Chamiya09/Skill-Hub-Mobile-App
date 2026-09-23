@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../components/company_logo_button.dart';
 import '../../models/candidate_application.dart';
 import '../../services/candidate_applications_service.dart';
 import 'find_jobs_screen.dart';
@@ -332,25 +333,11 @@ class _ApplicationCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 46,
-                    height: 46,
-                    alignment: Alignment.center,
-                    clipBehavior: Clip.antiAlias,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFECFDF5),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: application.companyLogoUrl?.isNotEmpty == true
-                        ? Image.network(
-                            application.companyLogoUrl!,
-                            fit: BoxFit.cover,
-                            width: 46,
-                            height: 46,
-                            errorBuilder: (_, _, _) =>
-                                _Initials(application.companyInitials),
-                          )
-                        : _Initials(application.companyInitials),
+                  CompanyLogoButton(
+                    companyIdentifier: application.companyName,
+                    initials: application.companyInitials,
+                    logoUrl: application.companyLogoUrl,
+                    size: 46,
                   ),
                   const SizedBox(width: 12),
                   Expanded(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../components/company_logo_button.dart';
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
 import 'find_jobs_screen.dart';
@@ -574,23 +575,14 @@ class _JobCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 46,
-                height: 46,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDF4),
-                  borderRadius: BorderRadius.circular(13),
-                  border: Border.all(color: const Color(0xFFD1FAE5)),
-                ),
-                child: Text(
-                  job.companyInitials,
-                  style: const TextStyle(
-                    color: _emeraldDark,
-                    fontSize: 19,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+              CompanyLogoButton(
+                companyIdentifier: job.companyId.isNotEmpty
+                    ? job.companyId
+                    : job.companyName,
+                initials: job.companyInitials,
+                logoUrl: job.logoUrl,
+                size: 46,
+                backgroundColor: const Color(0xFFF0FDF4),
               ),
               const SizedBox(width: 12),
               Expanded(
