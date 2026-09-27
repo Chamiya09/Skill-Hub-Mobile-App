@@ -7,6 +7,7 @@ import 'applied_jobs_screen.dart';
 import 'saved_jobs_screen.dart';
 import 'candidate_home_screen.dart';
 import 'digital_cv_screen.dart';
+import 'interviews_screen.dart';
 import '../../services/interview_prep_service.dart';
 
 const Color _emerald = Color(0xFF10B981);
@@ -66,7 +67,10 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
     final screens = <Widget>[
       const HomeScreen(),
       const AssessmentsScreen(),
-      const InterviewsScreen(),
+      InterviewsScreen(
+        token: widget.token,
+        user: widget.user,
+      ),
       AccountScreen(
         user: widget.user,
         token: widget.token,
@@ -330,19 +334,6 @@ class AssessmentsScreen extends StatelessWidget {
       icon: Icons.assignment_outlined,
       title: 'Assessments',
       description: 'View assigned assessments and track your results.',
-    );
-  }
-}
-
-class InterviewsScreen extends StatelessWidget {
-  const InterviewsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _PlaceholderScreen(
-      icon: Icons.calendar_today_outlined,
-      title: 'Interviews',
-      description: 'View scheduled and AI mock interviews.',
     );
   }
 }
