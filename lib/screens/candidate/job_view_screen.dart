@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../components/company_logo_button.dart';
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
+import 'company_details_screen.dart';
 
 const _emerald = Color(0xFF10B981);
 const _emeraldDark = Color(0xFF047857);
@@ -155,10 +157,6 @@ class _JobViewScreenState extends State<JobViewScreen> {
               onShare: () => _message('Job sharing will be available soon.'),
             ),
             const SizedBox(height: 16),
-            _MatchCard(
-              onTap: () => _message('AI match analysis is coming soon.'),
-            ),
-            const SizedBox(height: 16),
             _JobContentCard(
               eyebrow: 'JOB DESCRIPTION',
               title: 'About the Role',
@@ -180,7 +178,18 @@ class _JobViewScreenState extends State<JobViewScreen> {
             const SizedBox(height: 16),
             _OverviewCard(job: _job),
             const SizedBox(height: 16),
-            _CompanyCard(job: _job),
+            _CompanyCard(
+              job: _job,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => CompanyDetailsScreen(
+                    identifier: _job.companyId.isNotEmpty
+                        ? _job.companyId
+                        : _job.companyName,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: 18),
             _ApplyCard(
               job: _job,
@@ -221,15 +230,38 @@ class _HeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _Card(
+    return Container(
       padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF047857), Color(0xFF10B981)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x3310B981),
+            blurRadius: 18,
+            offset: Offset(0, 7),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _Logo(job: job, size: 58),
+              CompanyLogoButton(
+                companyIdentifier: job.companyId.isNotEmpty
+                    ? job.companyId
+                    : job.companyName,
+                initials: job.companyInitials,
+                logoUrl: job.logoUrl,
+                size: 58,
+                backgroundColor: Colors.white,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Row(
@@ -240,7 +272,7 @@ class _HeroCard extends StatelessWidget {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: _ink,
+                          color: Colors.white,
                           fontSize: 14,
                           fontWeight: FontWeight.w800,
                         ),
@@ -278,7 +310,7 @@ class _HeroCard extends StatelessWidget {
           Text(
             job.title,
             style: const TextStyle(
-              color: _ink,
+              color: Colors.white,
               fontSize: 23,
               height: 1.2,
               fontWeight: FontWeight.w900,
@@ -290,12 +322,21 @@ class _HeroCard extends StatelessWidget {
             spacing: 14,
             runSpacing: 10,
             children: [
-              _Meta(icon: Icons.location_on_outlined, text: job.location),
-              _Meta(icon: Icons.schedule_rounded, text: job.employmentType),
+              _Meta(
+                icon: Icons.location_on_outlined,
+                text: job.location,
+                light: true,
+              ),
+              _Meta(
+                icon: Icons.schedule_rounded,
+                text: job.employmentType,
+                light: true,
+              ),
               if (job.experienceLevel.isNotEmpty)
                 _Meta(
                   icon: Icons.business_center_outlined,
                   text: job.experienceLevel,
+                  light: true,
                 ),
             ],
           ),
@@ -316,14 +357,14 @@ class _HeroCard extends StatelessWidget {
                             vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
+                            color: const Color(0x26FFFFFF),
                             borderRadius: BorderRadius.circular(7),
-                            border: Border.all(color: _border),
+                            border: Border.all(color: const Color(0x33FFFFFF)),
                           ),
                           child: Text(
                             tag,
                             style: const TextStyle(
-                              color: Color(0xFF334155),
+                              color: Colors.white,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                             ),
@@ -407,61 +448,6 @@ class _HeaderActionButton extends StatelessWidget {
       ),
     );
   }
-}
-
-class _MatchCard extends StatelessWidget {
-  const _MatchCard({required this.onTap});
-  final VoidCallback onTap;
-  @override
-  Widget build(BuildContext context) => Material(
-    color: const Color(0xFFECFDF5),
-    borderRadius: BorderRadius.circular(18),
-    child: InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        padding: const EdgeInsets.all(17),
-        decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFFA7F3D0)),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: const Row(
-          children: [
-            CircleAvatar(
-              backgroundColor: Colors.white,
-              child: Icon(
-                Icons.auto_awesome_rounded,
-                color: _emeraldDark,
-                size: 20,
-              ),
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Analyze my match',
-                    style: TextStyle(
-                      color: _emeraldDark,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  SizedBox(height: 3),
-                  Text(
-                    'See how your Digital CV fits this role',
-                    style: TextStyle(color: Color(0xFF3F6F60), fontSize: 11),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.arrow_forward_rounded, color: _emeraldDark, size: 20),
-          ],
-        ),
-      ),
-    ),
-  );
 }
 
 class _ContentCard extends StatelessWidget {
@@ -780,51 +766,68 @@ class _OverviewRow extends StatelessWidget {
 }
 
 class _CompanyCard extends StatelessWidget {
-  const _CompanyCard({required this.job});
+  const _CompanyCard({required this.job, required this.onTap});
   final Job job;
+  final VoidCallback onTap;
   @override
-  Widget build(BuildContext context) => _Card(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+  Widget build(BuildContext context) => Material(
+    color: Colors.transparent,
+    borderRadius: BorderRadius.circular(20),
+    child: InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: _Card(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _Logo(job: job, size: 44),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    job.companyName,
-                    style: const TextStyle(
-                      color: _ink,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                    ),
+            Row(
+              children: [
+                CompanyLogoButton(
+                  companyIdentifier: job.companyId.isNotEmpty
+                      ? job.companyId
+                      : job.companyName,
+                  initials: job.companyInitials,
+                  logoUrl: job.logoUrl,
+                  size: 44,
+                  backgroundColor: const Color(0xFFECFDF5),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        job.companyName,
+                        style: const TextStyle(
+                          color: _ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      const Text(
+                        'Verified organization',
+                        style: TextStyle(color: _body, fontSize: 11),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Verified organization',
-                    style: TextStyle(color: _body, fontSize: 11),
-                  ),
-                ],
-              ),
+                ),
+                const Icon(
+                  Icons.verified_rounded,
+                  color: Color(0xFF2563EB),
+                  size: 20,
+                ),
+              ],
             ),
-            const Icon(
-              Icons.verified_rounded,
-              color: Color(0xFF2563EB),
-              size: 20,
+            const SizedBox(height: 13),
+            Text(
+              '${job.companyName} is actively hiring through Skill Hub’s verified technical talent network.',
+              style: const TextStyle(color: _body, fontSize: 13, height: 1.5),
             ),
           ],
         ),
-        const SizedBox(height: 13),
-        Text(
-          '${job.companyName} is actively hiring through Skill Hub’s verified technical talent network.',
-          style: const TextStyle(color: _body, fontSize: 13, height: 1.5),
-        ),
-      ],
+      ),
     ),
   );
 }
@@ -893,55 +896,21 @@ class _ApplyCard extends StatelessWidget {
   );
 }
 
-class _Logo extends StatelessWidget {
-  const _Logo({required this.job, required this.size});
-  final Job job;
-  final double size;
-  @override
-  Widget build(BuildContext context) => Container(
-    width: size,
-    height: size,
-    alignment: Alignment.center,
-    clipBehavior: Clip.antiAlias,
-    decoration: BoxDecoration(
-      color: const Color(0xFFD1FAE5),
-      borderRadius: BorderRadius.circular(size * .25),
-      border: Border.all(color: const Color(0xFFA7F3D0)),
-    ),
-    child: job.logoUrl != null
-        ? Image.network(
-            job.logoUrl!,
-            fit: BoxFit.cover,
-            width: size,
-            height: size,
-            errorBuilder: (_, _, _) => _initials(),
-          )
-        : _initials(),
-  );
-  Widget _initials() => Text(
-    job.companyInitials,
-    style: TextStyle(
-      color: const Color(0xFF065F46),
-      fontSize: size * .31,
-      fontWeight: FontWeight.w900,
-    ),
-  );
-}
-
 class _Meta extends StatelessWidget {
-  const _Meta({required this.icon, required this.text});
+  const _Meta({required this.icon, required this.text, this.light = false});
   final IconData icon;
   final String text;
+  final bool light;
   @override
   Widget build(BuildContext context) => Row(
     mainAxisSize: MainAxisSize.min,
     children: [
-      Icon(icon, size: 16, color: _body),
+      Icon(icon, size: 16, color: light ? const Color(0xE6FFFFFF) : _body),
       const SizedBox(width: 5),
       Text(
         text,
-        style: const TextStyle(
-          color: _body,
+        style: TextStyle(
+          color: light ? const Color(0xE6FFFFFF) : _body,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),

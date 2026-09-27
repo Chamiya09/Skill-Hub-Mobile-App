@@ -2,6 +2,7 @@ class SavedJob {
   const SavedJob({
     required this.id,
     required this.jobId,
+    required this.companyId,
     required this.jobTitle,
     required this.companyName,
     required this.location,
@@ -15,6 +16,7 @@ class SavedJob {
   factory SavedJob.fromJson(Map<String, dynamic> json) => SavedJob(
     id: json['id']?.toString() ?? '',
     jobId: json['jobId']?.toString() ?? '',
+    companyId: json['companyId']?.toString() ?? '',
     jobTitle: json['jobTitle']?.toString() ?? 'Position',
     companyName: json['companyName']?.toString() ?? 'Skill Hub Partner',
     companyLogoUrl: json['companyLogoUrl']?.toString(),
@@ -27,6 +29,7 @@ class SavedJob {
   );
   final String id,
       jobId,
+      companyId,
       jobTitle,
       companyName,
       location,

@@ -6,8 +6,11 @@ import '../../models/auth_session.dart';
 import 'applied_jobs_screen.dart';
 import 'saved_jobs_screen.dart';
 import 'candidate_home_screen.dart';
+import 'digital_cv_screen.dart';
+import '../../services/interview_prep_service.dart';
 
 const Color _emerald = Color(0xFF10B981);
+const Color _emeraldDark = Color(0xFF047857);
 const Color _darkText = Color(0xFF1F2937);
 const Color _mutedText = Color(0xFF9CA3AF);
 
@@ -362,48 +365,43 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
       children: [
-        const Text(
-          'My Account',
-          style: TextStyle(
-            color: _darkText,
-            fontSize: 24,
-            fontWeight: FontWeight.w800,
-            letterSpacing: -0.5,
-          ),
-        ),
-        const SizedBox(height: 5),
-        const Text(
-          'Manage your career profile and job activity.',
-          style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
-        ),
-        const SizedBox(height: 18),
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF047857), Color(0xFF10B981)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(22),
             boxShadow: const [
               BoxShadow(
-                color: Color(0x080F172A),
+                color: Color(0x3310B981),
                 blurRadius: 18,
-                offset: Offset(0, 6),
+                offset: Offset(0, 7),
               ),
             ],
           ),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 31,
-                backgroundColor: const Color(0xFFECFDF5),
-                child: Text(
-                  user.firstName.characters.first.toUpperCase(),
-                  style: const TextStyle(
-                    color: Color(0xFF047857),
-                    fontSize: 25,
-                    fontWeight: FontWeight.w800,
+              Container(
+                width: 58,
+                height: 58,
+                decoration: BoxDecoration(
+                  color: const Color(0x26FFFFFF),
+                  borderRadius: BorderRadius.circular(17),
+                  border: Border.all(color: const Color(0x33FFFFFF)),
+                ),
+                child: Center(
+                  child: Text(
+                    user.firstName.characters.first.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 25,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                 ),
               ),
@@ -417,9 +415,9 @@ class AccountScreen extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: _darkText,
+                        color: Colors.white,
                         fontSize: 18,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -428,7 +426,7 @@ class AccountScreen extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: Color(0xFF64748B),
+                        color: Color(0xD9FFFFFF),
                         fontSize: 12,
                       ),
                     ),
@@ -439,13 +437,14 @@ class AccountScreen extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFECFDF5),
+                        color: const Color(0x26FFFFFF),
                         borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: const Color(0x33FFFFFF)),
                       ),
                       child: const Text(
                         'VERIFIED CANDIDATE',
                         style: TextStyle(
-                          color: Color(0xFF047857),
+                          color: Colors.white,
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 0.5,
@@ -473,7 +472,14 @@ class AccountScreen extends StatelessWidget {
           icon: Icons.badge_outlined,
           title: 'My Digital CV',
           subtitle: 'Manage your verified professional profile',
-          onTap: () => _open(context, const _BlankDigitalCvPage()),
+          onTap: () => _open(context, DigitalCvScreen(token: token)),
+        ),
+        const SizedBox(height: 10),
+        _AccountMenuCard(
+          icon: Icons.school_outlined,
+          title: 'Study Dashboard',
+          subtitle: 'Prepare for assessments and interviews',
+          onTap: () => _open(context, _StudyDashboardPage(token: token)),
         ),
         const SizedBox(height: 10),
         _AccountMenuCard(
@@ -596,8 +602,32 @@ class _AccountMenuCard extends StatelessWidget {
   }
 }
 
-class _BlankDigitalCvPage extends StatelessWidget {
-  const _BlankDigitalCvPage();
+class _StudyDashboardPage extends StatefulWidget {
+  const _StudyDashboardPage({required this.token});
+
+  final String token;
+
+  @override
+  State<_StudyDashboardPage> createState() => _StudyDashboardPageState();
+}
+
+class _StudyDashboardPageState extends State<_StudyDashboardPage> {
+  late final InterviewPrepService _studyService;
+  late Future<List<InterviewPrepGuide>> _guidesFuture;
+  int _selectedRoleIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _studyService = InterviewPrepService();
+    _guidesFuture = _studyService.getMyGuides(widget.token);
+  }
+
+  @override
+  void dispose() {
+    _studyService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -606,17 +636,609 @@ class _BlankDigitalCvPage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'My Digital CV',
-          style: TextStyle(
-            color: _darkText,
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        toolbarHeight: 76,
+        leadingWidth: 62,
+        titleSpacing: 10,
+        shape: const Border(bottom: BorderSide(color: Color(0xFFF1F5F9))),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14, top: 14, bottom: 14),
+          child: Material(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: () => Navigator.of(context).pop(),
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                ),
+                child: const Icon(
+                  Icons.arrow_back_rounded,
+                  color: Color(0xFF334155),
+                  size: 21,
+                ),
+              ),
+            ),
           ),
         ),
+        title: const Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'LEARNING HUB',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _emerald,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'Study Dashboard',
+                    textAlign: TextAlign.right,
+                    style: TextStyle(
+                      color: _darkText,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(width: 11),
+            _StudyTitleIcon(),
+          ],
+        ),
+      ),
+      body: FutureBuilder<List<InterviewPrepGuide>>(
+        future: _guidesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: _emerald),
+            );
+          }
+          if (snapshot.hasError) {
+            return _StudyDataState(
+              icon: Icons.cloud_off_rounded,
+              title: 'Unable to load study guides',
+              message: 'Check your connection and try again.',
+              actionLabel: 'Try again',
+              onAction: () => setState(
+                () => _guidesFuture = _studyService.getMyGuides(widget.token),
+              ),
+            );
+          }
+          final guides = snapshot.data ?? const <InterviewPrepGuide>[];
+          if (guides.isEmpty) {
+            return const _StudyDataState(
+              icon: Icons.menu_book_outlined,
+              title: 'No study guides yet',
+              message: 'Role-specific guidelines will appear here when an interview preparation guide is generated for your application.',
+            );
+          }
+          final safeIndex = _selectedRoleIndex < guides.length
+              ? _selectedRoleIndex
+              : 0;
+          if (safeIndex != _selectedRoleIndex) {
+            _selectedRoleIndex = safeIndex;
+          }
+          return RefreshIndicator(
+            color: _emerald,
+            onRefresh: () async {
+              setState(
+                () => _guidesFuture = _studyService.getMyGuides(widget.token),
+              );
+              await _guidesFuture;
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: const EdgeInsets.fromLTRB(18, 18, 18, 32),
+              children: [
+                const _StudyWelcomeCard(),
+                const SizedBox(height: 16),
+                const _StudySectionLabel(
+                  label: 'ROLE-BASED STUDY GUIDES',
+                  caption: 'Choose a saved job guide from your database',
+                ),
+                const SizedBox(height: 10),
+                _StudyRoleSelector(
+                  guides: guides,
+                  selectedIndex: safeIndex,
+                  onSelected: (index) =>
+                      setState(() => _selectedRoleIndex = index),
+                ),
+                const SizedBox(height: 12),
+                _StudyRoleGuidelines(guide: guides[safeIndex]),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
+}
+
+class _StudyRoleSelector extends StatelessWidget {
+  const _StudyRoleSelector({
+    required this.guides,
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  final List<InterviewPrepGuide> guides;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(13, 4, 8, 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: const Icon(
+              Icons.work_outline_rounded,
+              color: _emeraldDark,
+              size: 19,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: selectedIndex,
+                isExpanded: true,
+                icon: const Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: _emeraldDark,
+                ),
+                borderRadius: BorderRadius.circular(14),
+                dropdownColor: Colors.white,
+                onChanged: (index) {
+                  if (index != null) onSelected(index);
+                },
+                items: [
+                  for (var index = 0; index < guides.length; index++)
+                    DropdownMenuItem<int>(
+                      value: index,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            guides[index].jobTitle,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: _darkText,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          Text(
+                            [
+                              guides[index].displayRole,
+                              if (guides[index].companyName?.isNotEmpty == true)
+                                guides[index].companyName!,
+                            ].join(' • '),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StudyRoleGuidelines extends StatelessWidget {
+  const _StudyRoleGuidelines({required this.guide});
+
+  final InterviewPrepGuide guide;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      _StudyRolePanel(
+        icon: Icons.menu_book_outlined,
+        eyebrow: 'THEORETICAL MAIN CONCEPTS',
+        title: '${guide.displayRole} foundations to master',
+        areas: guide.theoreticalAreas,
+      ),
+      const SizedBox(height: 10),
+      _StudyRolePanel(
+        icon: Icons.code_rounded,
+        eyebrow: 'PRACTICAL IMPLEMENTATION',
+        title: '${guide.displayRole} workflows to practice',
+        areas: guide.practicalAreas,
+      ),
+      const SizedBox(height: 10),
+      _StudyRolePanel(
+        icon: Icons.lightbulb_outline_rounded,
+        eyebrow: 'CAREER COACH STRATEGY',
+        title: 'How to communicate your ${guide.displayRole} experience',
+        points: guide.proTips,
+      ),
+    ],
+  );
+}
+
+class _StudyRolePanel extends StatelessWidget {
+  const _StudyRolePanel({
+    required this.icon,
+    required this.eyebrow,
+    required this.title,
+    this.areas = const [],
+    this.points = const [],
+  });
+
+  final IconData icon;
+  final String eyebrow;
+  final String title;
+  final List<StudyFocusArea> areas;
+  final List<String> points;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: const Color(0xFFE2E8F0)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: const Color(0xFFECFDF5),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(icon, color: _emeraldDark, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    eyebrow,
+                    style: const TextStyle(
+                      color: _emeraldDark,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: _darkText,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        ...areas.expand(
+          (area) => [
+            if (area.priority?.isNotEmpty == true ||
+                area.estimatedStudyTime?.isNotEmpty == true)
+              Text(
+                [
+                  if (area.priority?.isNotEmpty == true) area.priority!,
+                  if (area.estimatedStudyTime?.isNotEmpty == true)
+                    area.estimatedStudyTime!,
+                ].join(' • '),
+                style: const TextStyle(
+                  color: _emeraldDark,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            if (area.overview?.isNotEmpty == true)
+              Padding(
+                padding: const EdgeInsets.only(top: 5, bottom: 5),
+                child: Text(
+                  area.overview!,
+                  style: const TextStyle(
+                    color: Color(0xFF64748B),
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ...area.conceptsToReview.map(
+              (concept) => _StudyBullet(text: concept),
+            ),
+            if (area.practicalApplication?.isNotEmpty == true)
+              _StudyBullet(text: area.practicalApplication!),
+            if (area.coachTip?.isNotEmpty == true)
+              _StudyBullet(text: area.coachTip!),
+            const SizedBox(height: 6),
+          ],
+        ),
+        ...points.map(
+          (point) => Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 6, right: 8),
+                  child: Icon(Icons.circle, color: _emerald, size: 5),
+                ),
+                Expanded(
+                  child: Text(
+                    point,
+                    style: const TextStyle(
+                      color: Color(0xFF64748B),
+                      fontSize: 12,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _StudyDataState extends StatelessWidget {
+  const _StudyDataState({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.actionLabel,
+    this.onAction,
+  });
+
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: _emerald, size: 48),
+          const SizedBox(height: 14),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: _darkText,
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 13,
+              height: 1.45,
+            ),
+          ),
+          if (actionLabel != null && onAction != null) ...[
+            const SizedBox(height: 18),
+            FilledButton.icon(
+              onPressed: onAction,
+              icon: const Icon(Icons.refresh_rounded),
+              label: Text(actionLabel!),
+              style: FilledButton.styleFrom(backgroundColor: _emeraldDark),
+            ),
+          ],
+        ],
+      ),
+    ),
+  );
+}
+
+class _StudyBullet extends StatelessWidget {
+  const _StudyBullet({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 6, right: 8),
+          child: Icon(Icons.circle, color: _emerald, size: 5),
+        ),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 12,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _StudyWelcomeCard extends StatelessWidget {
+  const _StudyWelcomeCard();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(20),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [Color(0xFF047857), Color(0xFF10B981)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x3310B981),
+          blurRadius: 18,
+          offset: Offset(0, 7),
+        ),
+      ],
+    ),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 46,
+          height: 46,
+          decoration: BoxDecoration(
+            color: const Color(0x26FFFFFF),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: const Icon(
+            Icons.school_rounded,
+            color: Colors.white,
+            size: 25,
+          ),
+        ),
+        const SizedBox(width: 13),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Build momentum',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                'Use these guidelines to turn each application into a stronger opportunity.',
+                style: TextStyle(
+                  color: Color(0xE6FFFFFF),
+                  fontSize: 12,
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+class _StudySectionLabel extends StatelessWidget {
+  const _StudySectionLabel({required this.label, required this.caption});
+
+  final String label;
+  final String caption;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: const TextStyle(
+          color: _emeraldDark,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.8,
+        ),
+      ),
+      const SizedBox(height: 3),
+      Text(
+        caption,
+        style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+      ),
+    ],
+  );
+}
+
+class _StudyTitleIcon extends StatelessWidget {
+  const _StudyTitleIcon();
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: 42,
+    height: 42,
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        colors: [_emerald, Color(0xFF047857)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(13),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x3310B981),
+          blurRadius: 12,
+          offset: Offset(0, 5),
+        ),
+      ],
+    ),
+    child: const Icon(Icons.school_outlined, color: Colors.white, size: 21),
+  );
 }
 
 class _PlaceholderScreen extends StatelessWidget {
