@@ -1,3 +1,3 @@
 # Skill-Hub-Mobile-App
 
-# using flutter
+# using flutter new
