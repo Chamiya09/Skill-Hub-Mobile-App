@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:web/web.dart' as web;
 
 import '../../models/auth_session.dart';
 import '../../models/candidate_interview.dart';
@@ -130,21 +128,15 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
     // Always copy link for convenient access
     Clipboard.setData(ClipboardData(text: url));
 
-    if (kIsWeb) {
-      try {
-        web.window.open(url, '_blank');
-      } catch (_) {}
-    }
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.open_in_new_rounded, color: Colors.white, size: 18),
+            const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Opening meeting link: $url',
+                'Meeting link copied to clipboard: $url',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
