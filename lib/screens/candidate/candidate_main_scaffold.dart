@@ -8,6 +8,7 @@ import 'saved_jobs_screen.dart';
 import 'candidate_home_screen.dart';
 import 'digital_cv_screen.dart';
 import 'interviews_screen.dart';
+import 'assessments_screen.dart';
 import '../../services/interview_prep_service.dart';
 
 const Color _emerald = Color(0xFF10B981);
@@ -66,7 +67,10 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
   Widget build(BuildContext context) {
     final screens = <Widget>[
       const HomeScreen(),
-      const AssessmentsScreen(),
+      AssessmentsScreen(
+        token: widget.token,
+        user: widget.user,
+      ),
       InterviewsScreen(
         token: widget.token,
         user: widget.user,
@@ -321,19 +325,6 @@ class _CreativeTopTitle extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class AssessmentsScreen extends StatelessWidget {
-  const AssessmentsScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _PlaceholderScreen(
-      icon: Icons.assignment_outlined,
-      title: 'Assessments',
-      description: 'View assigned assessments and track your results.',
     );
   }
 }
@@ -1230,58 +1221,4 @@ class _StudyTitleIcon extends StatelessWidget {
     ),
     child: const Icon(Icons.school_outlined, color: Colors.white, size: 21),
   );
-}
-
-class _PlaceholderScreen extends StatelessWidget {
-  const _PlaceholderScreen({
-    required this.icon,
-    required this.title,
-    required this.description,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: _emerald.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(22),
-              ),
-              child: Icon(icon, color: _emerald, size: 34),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              style: const TextStyle(
-                color: _darkText,
-                fontSize: 22,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              description,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 14,
-                height: 1.5,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
