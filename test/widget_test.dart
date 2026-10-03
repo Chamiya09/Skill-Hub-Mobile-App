@@ -22,6 +22,28 @@ void main() {
     expect(job.companyInitials, 'SH');
     expect(job.detailTags, ['Engineering', 'Mid Level']);
     expect(job.salaryLabel, 'LKR 200K - 300K');
+    expect(job.deadline, isNull);
+    expect(job.isDeadlinePassed, isFalse);
+  });
+
+  test('parses active and expired job deadlines correctly', () {
+    final activeJob = Job.fromJson({
+      'id': 'job-2',
+      'title': 'Backend Developer',
+      'deadline': DateTime.now().add(const Duration(days: 7)).toIso8601String(),
+    });
+    expect(activeJob.deadline, isNotNull);
+    expect(activeJob.isDeadlinePassed, isFalse);
+    expect(activeJob.formattedDeadline, isNotNull);
+
+    final expiredJob = Job.fromJson({
+      'id': 'job-3',
+      'title': 'Frontend Developer',
+      'deadline': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+    });
+    expect(expiredJob.deadline, isNotNull);
+    expect(expiredJob.isDeadlinePassed, isTrue);
+    expect(expiredJob.deadlineLabel, 'Deadline Passed');
   });
 
   test('selects the greeting from the local time', () {

@@ -157,6 +157,10 @@ class _JobViewScreenState extends State<JobViewScreen> {
               onShare: () => _message('Job sharing will be available soon.'),
             ),
             const SizedBox(height: 16),
+            if (_job.deadline != null) ...[
+              _DeadlineBanner(job: _job),
+              const SizedBox(height: 16),
+            ],
             _JobContentCard(
               eyebrow: 'JOB DESCRIPTION',
               title: 'About the Role',
@@ -337,6 +341,17 @@ class _HeroCard extends StatelessWidget {
                   icon: Icons.business_center_outlined,
                   text: job.experienceLevel,
                   light: true,
+                ),
+              if (job.deadline != null)
+                _Meta(
+                  icon: Icons.access_time_rounded,
+                  text: job.isDeadlinePassed
+                      ? 'Deadline Passed'
+                      : 'Deadline: ${job.formattedDeadline}',
+                  light: true,
+                  customColor: job.isDeadlinePassed
+                      ? const Color(0xFFFECACA)
+                      : const Color(0xFFFEF3C7),
                 ),
             ],
           ),
@@ -685,14 +700,27 @@ class _OverviewCard extends StatelessWidget {
           label: 'Date posted',
           value: job.postedDateLabel,
         ),
+        if (job.deadline != null)
+          _OverviewRow(
+            icon: Icons.access_time_rounded,
+            label: 'Application deadline',
+            value: job.isDeadlinePassed
+                ? '${job.formattedDeadline ?? ''} (Closed)'
+                : (job.formattedDeadline ?? 'Not specified'),
+            warning: job.isDeadlinePassed,
+            active: !job.isDeadlinePassed,
+          ),
         _OverviewRow(
           icon: Icons.check_circle_outline_rounded,
           label: 'Status',
-          value: job.status == 'Active'
-              ? 'Active & accepting applications'
-              : job.status,
+          value: job.isDeadlinePassed
+              ? 'Applications closed'
+              : (job.status == 'Active'
+                  ? 'Active & accepting applications'
+                  : job.status),
           last: true,
-          active: job.status == 'Active',
+          active: job.status == 'Active' && !job.isDeadlinePassed,
+          warning: job.isDeadlinePassed,
         ),
       ],
     ),
@@ -706,12 +734,14 @@ class _OverviewRow extends StatelessWidget {
     required this.value,
     this.last = false,
     this.active = false,
+    this.warning = false,
   });
   final IconData icon;
   final String label;
   final String value;
   final bool last;
   final bool active;
+  final bool warning;
   @override
   Widget build(BuildContext context) => Container(
     padding: EdgeInsets.only(bottom: last ? 0 : 14, top: 2),
@@ -729,10 +759,18 @@ class _OverviewRow extends StatelessWidget {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: const Color(0xFFF0FDF4),
+            color: warning
+                ? const Color(0xFFFEF2F2)
+                : (active ? const Color(0xFFF0FDF4) : const Color(0xFFF8FAFC)),
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: _emeraldDark, size: 19),
+          child: Icon(
+            icon,
+            color: warning
+                ? const Color(0xFFDC2626)
+                : (active ? _emeraldDark : _body),
+            size: 19,
+          ),
         ),
         const SizedBox(width: 12),
         Expanded(
@@ -752,7 +790,9 @@ class _OverviewRow extends StatelessWidget {
               Text(
                 value,
                 style: TextStyle(
-                  color: active ? _emeraldDark : _ink,
+                  color: warning
+                      ? const Color(0xFFDC2626)
+                      : (active ? _emeraldDark : _ink),
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -842,81 +882,217 @@ class _ApplyCard extends StatelessWidget {
   final bool applied;
   final VoidCallback onApply;
   @override
-  Widget build(BuildContext context) => _Card(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Interested in this position?',
-          style: TextStyle(
-            color: _ink,
-            fontSize: 17,
-            fontWeight: FontWeight.w800,
+  Widget build(BuildContext context) {
+    final isExpired = job.isDeadlinePassed;
+
+    return _Card(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            isExpired ? 'Applications are closed' : 'Interested in this position?',
+            style: const TextStyle(
+              color: _ink,
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
-        const SizedBox(height: 7),
-        Text(
-          'Submit your verified Digital CV directly to ${job.companyName}’s recruiting pipeline.',
-          style: const TextStyle(color: _body, fontSize: 13, height: 1.5),
-        ),
-        const SizedBox(height: 17),
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: FilledButton.icon(
-            onPressed: applied ? null : onApply,
-            style: FilledButton.styleFrom(
-              backgroundColor: _emerald,
-              disabledBackgroundColor: const Color(0xFFF1F5F9),
-              disabledForegroundColor: _body,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(13),
+          const SizedBox(height: 7),
+          Text(
+            isExpired
+                ? 'The application deadline for this vacancy has passed. Applications are no longer accepted.'
+                : 'Submit your verified Digital CV directly to ${job.companyName}’s recruiting pipeline.',
+            style: TextStyle(
+              color: isExpired ? const Color(0xFFDC2626) : _body,
+              fontSize: 13,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 17),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: FilledButton.icon(
+              onPressed: (applied || isExpired) ? null : onApply,
+              style: FilledButton.styleFrom(
+                backgroundColor: isExpired ? const Color(0xFFFEF2F2) : _emerald,
+                disabledBackgroundColor:
+                    isExpired ? const Color(0xFFFEF2F2) : const Color(0xFFF1F5F9),
+                disabledForegroundColor:
+                    isExpired ? const Color(0xFFDC2626) : _body,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                  side: isExpired
+                      ? const BorderSide(color: Color(0xFFFECACA))
+                      : BorderSide.none,
+                ),
+              ),
+              icon: Icon(
+                isExpired
+                    ? Icons.timer_off_outlined
+                    : (applied ? Icons.check_circle_rounded : Icons.send_rounded),
+                size: 19,
+              ),
+              label: Text(
+                isExpired
+                    ? 'Deadline Passed'
+                    : (applied ? 'Application ready' : 'Apply with Digital CV'),
+                style: const TextStyle(fontWeight: FontWeight.w800),
               ),
             ),
-            icon: Icon(
-              applied ? Icons.check_circle_rounded : Icons.send_rounded,
-              size: 19,
-            ),
-            label: Text(
-              applied ? 'Application ready' : 'Apply with Digital CV',
-              style: const TextStyle(fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 10),
+          Center(
+            child: Text(
+              isExpired
+                  ? 'Application deadline was ${job.formattedDeadline ?? 'reached'}'
+                  : 'Fast, secure application powered by Digital CV',
+              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        const Center(
-          child: Text(
-            'Fast, secure application powered by Digital CV',
-            style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10),
+        ],
+      ),
+    );
+  }
+}
+
+class _DeadlineBanner extends StatelessWidget {
+  const _DeadlineBanner({required this.job});
+
+  final Job job;
+
+  @override
+  Widget build(BuildContext context) {
+    final isExpired = job.isDeadlinePassed;
+    final bgColor = isExpired ? const Color(0xFFFEF2F2) : const Color(0xFFFFFBEB);
+    final borderColor = isExpired ? const Color(0xFFFECACA) : const Color(0xFFFDE68A);
+    final iconBgColor = isExpired ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7);
+    final iconColor = isExpired ? const Color(0xFFEF4444) : const Color(0xFFD97706);
+    final eyebrowColor = isExpired ? const Color(0xFFB91C1C) : const Color(0xFF92400E);
+    final textColor = isExpired ? const Color(0xFF991B1B) : const Color(0xFF78350F);
+    final badgeBgColor = isExpired ? const Color(0xFFEF4444) : const Color(0xFF059669);
+    final badgeLabel = isExpired ? 'Applications Closed' : 'Accepting Applications';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x060F172A),
+            blurRadius: 10,
+            offset: Offset(0, 3),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isExpired ? Icons.event_busy_rounded : Icons.schedule_rounded,
+                  color: iconColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'APPLICATION DEADLINE',
+                      style: TextStyle(
+                        color: eyebrowColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      job.formattedDeadlineFull ?? job.formattedDeadline ?? '',
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: badgeBgColor,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                badgeLabel,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Meta extends StatelessWidget {
-  const _Meta({required this.icon, required this.text, this.light = false});
+  const _Meta({
+    required this.icon,
+    required this.text,
+    this.light = false,
+    this.customColor,
+  });
   final IconData icon;
   final String text;
   final bool light;
+  final Color? customColor;
   @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(icon, size: 16, color: light ? const Color(0xE6FFFFFF) : _body),
-      const SizedBox(width: 5),
-      Text(
-        text,
-        style: TextStyle(
-          color: light ? const Color(0xE6FFFFFF) : _body,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
+  Widget build(BuildContext context) {
+    final effectiveColor =
+        customColor ?? (light ? const Color(0xE6FFFFFF) : _body);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: effectiveColor),
+        const SizedBox(width: 5),
+        Text(
+          text,
+          style: TextStyle(
+            color: effectiveColor,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-      ),
-    ],
-  );
+      ],
+    );
+  }
 }
 
 class _Card extends StatelessWidget {

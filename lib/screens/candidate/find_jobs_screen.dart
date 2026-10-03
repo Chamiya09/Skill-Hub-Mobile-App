@@ -629,9 +629,34 @@ class _ResultJobCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    job.postedLabel,
-                    style: const TextStyle(color: _muted, fontSize: 10),
+                  Row(
+                    children: [
+                      Text(
+                        job.postedLabel,
+                        style: const TextStyle(color: _muted, fontSize: 10),
+                      ),
+                      if (job.deadline != null) ...[
+                        const Text(
+                          ' • ',
+                          style: TextStyle(color: _muted, fontSize: 10),
+                        ),
+                        Flexible(
+                          child: Text(
+                            job.isDeadlinePassed
+                                ? 'Deadline passed'
+                                : 'Due ${job.shortDeadlineLabel}',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: job.isDeadlinePassed
+                                  ? const Color(0xFFEF4444)
+                                  : const Color(0xFFD97706),
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
