@@ -971,8 +971,6 @@ class _DeadlineBanner extends StatelessWidget {
     final iconColor = isExpired ? const Color(0xFFEF4444) : const Color(0xFFD97706);
     final eyebrowColor = isExpired ? const Color(0xFFB91C1C) : const Color(0xFF92400E);
     final textColor = isExpired ? const Color(0xFF991B1B) : const Color(0xFF78350F);
-    final badgeBgColor = isExpired ? const Color(0xFFEF4444) : const Color(0xFF059669);
-    final badgeLabel = isExpired ? 'Applications Closed' : 'Accepting Applications';
 
     return Container(
       width: double.infinity,
@@ -1037,25 +1035,27 @@ class _DeadlineBanner extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: badgeBgColor,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                badgeLabel,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+          if (isExpired) ...[
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  'Applications Closed',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
