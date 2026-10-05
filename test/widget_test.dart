@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:skill_hub_mobile_app/components/skill_hub_loading_indicator.dart';
 import 'package:skill_hub_mobile_app/config/api_config.dart';
+import 'package:skill_hub_mobile_app/models/auth_session.dart';
 import 'package:skill_hub_mobile_app/models/job.dart';
 import 'package:skill_hub_mobile_app/screens/auth/loading_screen.dart';
 import 'package:skill_hub_mobile_app/screens/candidate/candidate_main_scaffold.dart';
@@ -48,6 +49,33 @@ void main() {
     expect(find.text('SkillHub'), findsOneWidget);
     await tester.pump(const Duration(milliseconds: 450));
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('keeps all account options and profile details', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: AccountScreen(
+          user: const CandidateUser(
+            id: 'candidate-1',
+            fullName: 'Alex Morgan',
+            email: 'alex@example.com',
+            role: 'CANDIDATE',
+          ),
+          token: 'test-token',
+          onLogout: () async {},
+          onOpenAssessments: () {},
+        ),
+      ),
+    );
+
+    expect(find.text('Alex Morgan'), findsOneWidget);
+    expect(find.text('alex@example.com'), findsOneWidget);
+    expect(find.text('VERIFIED CANDIDATE'), findsOneWidget);
+    expect(find.text('My Digital CV'), findsOneWidget);
+    expect(find.text('Study Dashboard'), findsOneWidget);
+    expect(find.text('Applied Jobs'), findsOneWidget);
+    expect(find.text('Saved Jobs'), findsOneWidget);
+    expect(find.text('Sign out of Skill Hub'), findsOneWidget);
   });
 
   test('maps the public jobs API response', () {

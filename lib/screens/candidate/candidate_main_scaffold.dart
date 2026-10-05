@@ -308,166 +308,174 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF047857), Color(0xFF10B981)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x3310B981),
-                blurRadius: 18,
-                offset: Offset(0, 7),
+    return ColoredBox(
+      color: const Color(0xFFF8FAFC),
+      child: ListView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF047857),
+                  Color(0xFF059669),
+                  Color(0xFF10B981),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  color: const Color(0x26FFFFFF),
-                  borderRadius: BorderRadius.circular(17),
-                  border: Border.all(color: const Color(0x33FFFFFF)),
+              borderRadius: BorderRadius.circular(21),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x2410B981),
+                  blurRadius: 16,
+                  offset: Offset(0, 6),
                 ),
-                child: Center(
-                  child: Text(
-                    user.firstName.characters.first.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w900,
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 54,
+                  height: 54,
+                  decoration: BoxDecoration(
+                    color: const Color(0x26FFFFFF),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0x55FFFFFF)),
+                  ),
+                  child: Center(
+                    child: Text(
+                      user.firstName.characters.first.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      user.fullName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      user.email,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xD9FFFFFF),
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0x26FFFFFF),
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: const Color(0x33FFFFFF)),
-                      ),
-                      child: const Text(
-                        'VERIFIED CANDIDATE',
-                        style: TextStyle(
+                const SizedBox(width: 13),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.fullName,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 8,
+                          fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
+                          letterSpacing: -0.2,
                         ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        user.email,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xE6FFFFFF),
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0x1FFFFFFF),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(color: const Color(0x55FFFFFF)),
+                        ),
+                        child: const Text(
+                          'VERIFIED CANDIDATE',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 8,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.55,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'CAREER CENTER',
+            style: TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.9,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.badge_outlined,
+            title: 'My Digital CV',
+            subtitle: 'Manage your verified professional profile',
+            onTap: () => _open(context, DigitalCvScreen(token: token)),
+          ),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.school_outlined,
+            title: 'Study Dashboard',
+            subtitle: 'Prepare for assessments and interviews',
+            onTap: () => _open(context, _StudyDashboardPage(token: token)),
+          ),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.work_outline_rounded,
+            title: 'Applied Jobs',
+            subtitle: 'Track your submitted job applications',
+            onTap: () => _open(
+              context,
+              AppliedJobsScreen(
+                token: token,
+                onOpenAssessments: () {
+                  Navigator.of(context).pop();
+                  onOpenAssessments();
+                },
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'CAREER CENTER',
-          style: TextStyle(
-            color: Color(0xFF94A3B8),
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.badge_outlined,
-          title: 'My Digital CV',
-          subtitle: 'Manage your verified professional profile',
-          onTap: () => _open(context, DigitalCvScreen(token: token)),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.school_outlined,
-          title: 'Study Dashboard',
-          subtitle: 'Prepare for assessments and interviews',
-          onTap: () => _open(context, _StudyDashboardPage(token: token)),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.work_outline_rounded,
-          title: 'Applied Jobs',
-          subtitle: 'Track your submitted job applications',
-          onTap: () => _open(
-            context,
-            AppliedJobsScreen(
-              token: token,
-              onOpenAssessments: () {
-                Navigator.of(context).pop();
-                onOpenAssessments();
-              },
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.bookmark_border_rounded,
-          title: 'Saved Jobs',
-          subtitle: 'Review opportunities you saved for later',
-          onTap: () => _open(context, SavedJobsScreen(token: token)),
-        ),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: onLogout,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFDC2626),
-            backgroundColor: Colors.white,
-            side: const BorderSide(color: Color(0xFFFECACA)),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(13),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.bookmark_border_rounded,
+            title: 'Saved Jobs',
+            subtitle: 'Review opportunities you saved for later',
+            onTap: () => _open(context, SavedJobsScreen(token: token)),
+          ),
+          const SizedBox(height: 22),
+          OutlinedButton.icon(
+            onPressed: onLogout,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFDC2626),
+              backgroundColor: Colors.white,
+              side: const BorderSide(color: Color(0xFFFECACA)),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.logout_rounded, size: 18),
+            label: const Text(
+              'Sign out of Skill Hub',
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
-          icon: const Icon(Icons.logout_rounded, size: 19),
-          label: const Text(
-            'Sign out of Skill Hub',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -493,28 +501,28 @@ class _AccountMenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(15),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(15),
         child: Container(
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: const Color(0xFFDCE5EF)),
           ),
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 42,
+                height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
+                  color: const Color(0xFFE9FBF3),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: const Color(0xFF047857), size: 22),
+                child: Icon(icon, color: const Color(0xFF047857), size: 21),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,14 +530,16 @@ class _AccountMenuCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        color: _darkText,
+                        color: Color(0xFF172033),
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Color(0xFF64748B),
                         fontSize: 11,
@@ -538,7 +548,12 @@ class _AccountMenuCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF8A9AAF),
+                size: 22,
+              ),
             ],
           ),
         ),

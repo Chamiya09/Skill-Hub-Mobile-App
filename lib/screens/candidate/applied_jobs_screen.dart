@@ -170,8 +170,9 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
     );
   }
 
-  void _openFindJobs() => Navigator.of(context)
-      .push(MaterialPageRoute<void>(builder: (_) => const FindJobsScreen()));
+  void _openFindJobs() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => const FindJobsScreen()));
 
   Future<void> _showProgress(CandidateApplication application) async {
     final openAssessments = await showModalBottomSheet<bool>(
@@ -591,14 +592,6 @@ class _ProgressSheet extends StatelessWidget {
                       rejected: rejected,
                       suspended: suspended,
                     ),
-                    const SizedBox(height: 20),
-                    _CopilotInsight(
-                      message: _copilotMessage(
-                        stage,
-                        rejected: rejected,
-                        suspended: suspended,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -674,27 +667,6 @@ bool _isRejected(String status) {
 bool _isSuspended(String status) {
   final value = status.toLowerCase();
   return value.contains('suspend') || value.contains('block');
-}
-
-String _copilotMessage(
-  int stage, {
-  required bool rejected,
-  required bool suspended,
-}) {
-  if (rejected) {
-    return 'Your application was not selected to proceed after the shortlisting review. Thank you for your interest and time.';
-  }
-  if (suspended) {
-    return 'Your technical assessment was suspended because the test session rules were not followed. This assessment cannot be retaken.';
-  }
-  return [
-    'Your application is submitted. Keep your Digital CV current while the hiring team begins its review.',
-    'Your profile is being reviewed. Prepare two measurable examples that demonstrate impact in this role.',
-    'You made the shortlist. A technical assessment may be dispatched by the hiring committee.',
-    'Your technical assessment has been sent by HR. Head to Technical Assessments to take your coding challenge.',
-    'Your interview stage is active. Rehearse concise STAR responses and questions for the hiring team.',
-    'You reached the offer stage. Review the role scope, total package, and growth expectations carefully.',
-  ][stage];
 }
 
 String _date(DateTime? date) {
@@ -832,66 +804,6 @@ class _JourneyStepper extends StatelessWidget {
       ),
     );
   }
-}
-
-class _CopilotInsight extends StatelessWidget {
-  const _CopilotInsight({required this.message});
-  final String message;
-  @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.all(15),
-    decoration: BoxDecoration(
-      gradient: const LinearGradient(
-        colors: [Color(0xFFF5F7FF), Color(0xFFF8FAFC)],
-      ),
-      borderRadius: BorderRadius.circular(13),
-      border: Border.all(color: const Color(0xFFC7D2FE)),
-    ),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Icon(
-            Icons.auto_awesome_rounded,
-            color: Color(0xFF6366F1),
-            size: 17,
-          ),
-        ),
-        const SizedBox(width: 11),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'AI COPILOT INSIGHT',
-                style: TextStyle(
-                  color: Color(0xFF3730A3),
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: .5,
-                ),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                message,
-                style: const TextStyle(
-                  color: Color(0xFF475569),
-                  fontSize: 12,
-                  height: 1.55,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 class _StatusBadge extends StatelessWidget {
