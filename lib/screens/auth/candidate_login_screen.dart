@@ -167,39 +167,7 @@ class _CandidateLoginScreenState extends State<CandidateLoginScreen> {
                               },
                             ),
                             const SizedBox(height: 17),
-                            Row(
-                              children: [
-                                const Expanded(child: _FieldLabel('Password')),
-                                TextButton(
-                                  onPressed: _loading
-                                      ? null
-                                      : () => ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Password recovery is coming soon.',
-                                                ),
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                              ),
-                                            ),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: _emeraldDark,
-                                    padding: EdgeInsets.zero,
-                                    minimumSize: Size.zero,
-                                    tapTargetSize:
-                                        MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  child: const Text(
-                                    'Forgot password?',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            const _FieldLabel('Password'),
                             const SizedBox(height: 7),
                             TextFormField(
                               controller: _passwordController,
@@ -297,25 +265,7 @@ class _CandidateLoginScreenState extends State<CandidateLoginScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 19),
-                            const Center(
-                              child: Text.rich(
-                                TextSpan(
-                                  style: TextStyle(color: _body, fontSize: 12),
-                                  children: [
-                                    TextSpan(text: 'New to Skill Hub? '),
-                                    TextSpan(
-                                      text: 'Create candidate account',
-                                      style: TextStyle(
-                                        color: _emeraldDark,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 18),
+                            const SizedBox(height: 30),
                             const Divider(color: Color(0xFFF1F5F9)),
                             const SizedBox(height: 12),
                             const Row(
