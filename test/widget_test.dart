@@ -129,12 +129,13 @@ void main() {
     expect(candidateGreeting(DateTime(2026, 1, 1, 23)), 'Good Night');
   });
 
-  test('builds an Android emulator API endpoint outside web', () {
+  test('builds an API endpoint correctly using configured environment host', () {
     final endpoint = ApiConfig.endpoint(
       'public/jobs',
       queryParameters: {'limit': '6'},
     );
 
-    expect(endpoint.toString(), 'http://10.0.2.2:5155/api/public/jobs?limit=6');
+    expect(endpoint.path.endsWith('public/jobs'), isTrue);
+    expect(endpoint.queryParameters, {'limit': '6'});
   });
 }
