@@ -108,24 +108,32 @@ class _CandidateLoginScreenState extends State<CandidateLoginScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const _PortalBadge(),
+                            const Center(child: _PortalBadge()),
                             const SizedBox(height: 15),
-                            const Text(
-                              'Welcome back',
-                              style: TextStyle(
-                                color: _ink,
-                                fontSize: 30,
-                                fontWeight: FontWeight.w900,
-                                letterSpacing: -0.9,
+                            const SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'Welcome back',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: _ink,
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.9,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 7),
-                            const Text(
-                              'Sign in to discover matched jobs and manage your Digital CV.',
-                              style: TextStyle(
-                                color: _body,
-                                fontSize: 14,
-                                height: 1.55,
+                            const SizedBox(
+                              width: double.infinity,
+                              child: Text(
+                                'Sign in to discover matched jobs and manage your Digital CV.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: _body,
+                                  fontSize: 14,
+                                  height: 1.55,
+                                ),
                               ),
                             ),
                             if (_error != null) ...[
