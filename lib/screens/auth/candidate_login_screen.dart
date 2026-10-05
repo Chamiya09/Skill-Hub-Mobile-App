@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/auth_session.dart';
 import '../../services/auth_service.dart';
+import 'loading_screen.dart';
 
 const _emerald = Color(0xFF10B981);
 const _emeraldDark = Color(0xFF047857);
@@ -23,6 +24,8 @@ class CandidateLoginScreen extends StatefulWidget {
 }
 
 class _CandidateLoginScreenState extends State<CandidateLoginScreen> {
+  static const _minimumLoginAnimationDuration = Duration(milliseconds: 700);
+
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -40,6 +43,7 @@ class _CandidateLoginScreenState extends State<CandidateLoginScreen> {
   Future<void> _login() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate() || _loading) return;
+    final loadingTimer = Stopwatch()..start();
     setState(() {
       _loading = true;
       _error = null;
@@ -49,6 +53,10 @@ class _CandidateLoginScreenState extends State<CandidateLoginScreen> {
         email: _emailController.text,
         password: _passwordController.text,
       );
+      final remaining = _minimumLoginAnimationDuration - loadingTimer.elapsed;
+      if (remaining > Duration.zero) {
+        await Future<void>.delayed(remaining);
+      }
       if (mounted) widget.onAuthenticated(session);
     } on AuthException catch (error) {
       if (mounted) setState(() => _error = error.message);
@@ -59,6 +67,10 @@ class _CandidateLoginScreenState extends State<CandidateLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const LoadingScreen(message: 'Signing you in...');
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(

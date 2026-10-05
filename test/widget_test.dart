@@ -26,6 +26,26 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('shows the sign-in message on the loading screen', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: LoadingScreen(message: 'Signing you in...')),
+    );
+
+    expect(find.text('Signing you in...'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label == 'Signing you in...',
+      ),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('uses the SkillHub animation for assessment loading', (
     tester,
   ) async {
