@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../models/auth_session.dart';
 import '../../models/candidate_assessment.dart';
 import '../../services/candidate_assessments_service.dart';
@@ -14,11 +15,7 @@ const _cardBg = Colors.white;
 enum _AssessmentFilterTab { all, pending, completed, expired }
 
 class AssessmentsScreen extends StatefulWidget {
-  const AssessmentsScreen({
-    super.key,
-    required this.token,
-    this.user,
-  });
+  const AssessmentsScreen({super.key, required this.token, this.user});
 
   final String token;
   final CandidateUser? user;
@@ -28,8 +25,9 @@ class AssessmentsScreen extends StatefulWidget {
 }
 
 class _AssessmentsScreenState extends State<AssessmentsScreen> {
-  late final CandidateAssessmentsService _service =
-      CandidateAssessmentsService(token: widget.token);
+  late final CandidateAssessmentsService _service = CandidateAssessmentsService(
+    token: widget.token,
+  );
 
   List<CandidateAssessmentListItem> _assessments = const [];
   bool _loading = true;
@@ -73,7 +71,9 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Failed to load assigned technical assessments.');
+        setState(
+          () => _error = 'Failed to load assigned technical assessments.',
+        );
       }
     } finally {
       if (mounted) {
@@ -89,9 +89,14 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
       final isExpired = item.checkIsExpired;
       final isPending = item.isActionRequired;
 
-      if (_activeTab == _AssessmentFilterTab.pending && !isPending) return false;
-      if (_activeTab == _AssessmentFilterTab.completed && !isCompleted) return false;
-      if (_activeTab == _AssessmentFilterTab.expired && !isExpired && !isBlocked) return false;
+      if (_activeTab == _AssessmentFilterTab.pending && !isPending)
+        return false;
+      if (_activeTab == _AssessmentFilterTab.completed && !isCompleted)
+        return false;
+      if (_activeTab == _AssessmentFilterTab.expired &&
+          !isExpired &&
+          !isBlocked)
+        return false;
 
       if (_searchQuery.trim().isNotEmpty) {
         final q = _searchQuery.trim().toLowerCase();
@@ -106,8 +111,10 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
   }
 
   int get _pendingCount => _assessments.where((a) => a.isActionRequired).length;
-  int get _completedCount => _assessments.where((a) => a.checkIsCompleted).length;
-  int get _expiredCount => _assessments.where((a) => a.checkIsExpired || a.checkIsBlocked).length;
+  int get _completedCount =>
+      _assessments.where((a) => a.checkIsCompleted).length;
+  int get _expiredCount =>
+      _assessments.where((a) => a.checkIsExpired || a.checkIsBlocked).length;
 
   int get _averageScore {
     final graded = _assessments.where((a) => a.isGraded).toList();
@@ -121,22 +128,46 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => _ScorecardBottomSheet(
-        assessment: assessment,
-        service: _service,
-      ),
+      builder: (context) =>
+          _ScorecardBottomSheet(assessment: assessment, service: _service),
     );
   }
 
   String _formatDate(DateTime? dt) {
     if (dt == null) return 'Recently';
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 
   String _formatDeadline(DateTime? dt) {
     if (dt == null) return 'No deadline';
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
     final ampm = dt.hour >= 12 ? 'PM' : 'AM';
     final min = dt.minute.toString().padLeft(2, '0');
@@ -304,11 +335,22 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                         style: const TextStyle(fontSize: 13, color: _ink),
                         decoration: InputDecoration(
                           hintText: 'Search by job, track, or company...',
-                          hintStyle: const TextStyle(fontSize: 12.5, color: _muted),
-                          prefixIcon: const Icon(Icons.search_rounded, size: 18, color: _muted),
+                          hintStyle: const TextStyle(
+                            fontSize: 12.5,
+                            color: _muted,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search_rounded,
+                            size: 18,
+                            color: _muted,
+                          ),
                           suffixIcon: _searchQuery.isNotEmpty
                               ? IconButton(
-                                  icon: const Icon(Icons.clear_rounded, size: 16, color: _muted),
+                                  icon: const Icon(
+                                    Icons.clear_rounded,
+                                    size: 16,
+                                    color: _muted,
+                                  ),
                                   onPressed: () {
                                     _searchController.clear();
                                     setState(() => _searchQuery = '');
@@ -316,7 +358,9 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                                 )
                               : null,
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -331,26 +375,37 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                           _buildFilterChip(
                             label: 'All (${_assessments.length})',
                             isSelected: _activeTab == _AssessmentFilterTab.all,
-                            onTap: () => setState(() => _activeTab = _AssessmentFilterTab.all),
+                            onTap: () => setState(
+                              () => _activeTab = _AssessmentFilterTab.all,
+                            ),
                           ),
                           const SizedBox(width: 6),
                           _buildFilterChip(
                             label: 'Action Required ($_pendingCount)',
-                            isSelected: _activeTab == _AssessmentFilterTab.pending,
-                            onTap: () => setState(() => _activeTab = _AssessmentFilterTab.pending),
+                            isSelected:
+                                _activeTab == _AssessmentFilterTab.pending,
+                            onTap: () => setState(
+                              () => _activeTab = _AssessmentFilterTab.pending,
+                            ),
                           ),
                           const SizedBox(width: 6),
                           _buildFilterChip(
                             label: 'Completed ($_completedCount)',
-                            isSelected: _activeTab == _AssessmentFilterTab.completed,
-                            onTap: () => setState(() => _activeTab = _AssessmentFilterTab.completed),
+                            isSelected:
+                                _activeTab == _AssessmentFilterTab.completed,
+                            onTap: () => setState(
+                              () => _activeTab = _AssessmentFilterTab.completed,
+                            ),
                           ),
                           if (_expiredCount > 0) ...[
                             const SizedBox(width: 6),
                             _buildFilterChip(
                               label: 'Expired ($_expiredCount)',
-                              isSelected: _activeTab == _AssessmentFilterTab.expired,
-                              onTap: () => setState(() => _activeTab = _AssessmentFilterTab.expired),
+                              isSelected:
+                                  _activeTab == _AssessmentFilterTab.expired,
+                              onTap: () => setState(
+                                () => _activeTab = _AssessmentFilterTab.expired,
+                              ),
                             ),
                           ],
                         ],
@@ -366,20 +421,8 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
               const SliverFillRemaining(
                 hasScrollBody: false,
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(color: _emerald),
-                      SizedBox(height: 14),
-                      Text(
-                        'Loading assigned technical assessments...',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: _muted,
-                        ),
-                      ),
-                    ],
+                  child: SkillHubLoadingIndicator(
+                    message: 'Loading assigned technical assessments...',
                   ),
                 ),
               )
@@ -465,10 +508,10 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                           _searchQuery.isNotEmpty
                               ? 'No Matching Assessments'
                               : _activeTab == _AssessmentFilterTab.pending
-                                  ? 'No Action Required'
-                                  : _activeTab == _AssessmentFilterTab.completed
-                                      ? 'No Completed Assessments Yet'
-                                      : 'No Technical Assessments Yet',
+                              ? 'No Action Required'
+                              : _activeTab == _AssessmentFilterTab.completed
+                              ? 'No Completed Assessments Yet'
+                              : 'No Technical Assessments Yet',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 17,
@@ -488,7 +531,8 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                             height: 1.4,
                           ),
                         ),
-                        if (_searchQuery.isNotEmpty || _activeTab != _AssessmentFilterTab.all) ...[
+                        if (_searchQuery.isNotEmpty ||
+                            _activeTab != _AssessmentFilterTab.all) ...[
                           const SizedBox(height: 16),
                           TextButton.icon(
                             onPressed: () {
@@ -502,7 +546,9 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                             label: const Text('Reset Filters'),
                             style: TextButton.styleFrom(
                               foregroundColor: _emeraldDark,
-                              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                              textStyle: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
                         ],
@@ -515,16 +561,13 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                 sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final item = displayedList[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 14),
-                        child: _buildAssessmentCard(item),
-                      );
-                    },
-                    childCount: displayedList.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    final item = displayedList[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 14),
+                      child: _buildAssessmentCard(item),
+                    );
+                  }, childCount: displayedList.length),
                 ),
               ),
           ],
@@ -567,11 +610,19 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 10.5, color: _muted, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    color: _muted,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: _ink),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: _ink,
+                  ),
                 ),
               ],
             ),
@@ -629,7 +680,9 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: isSelected ? const Color(0x1410B981) : const Color(0x08000000),
+            color: isSelected
+                ? const Color(0x1410B981)
+                : const Color(0x08000000),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -752,7 +805,11 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
               ),
               child: const Row(
                 children: [
-                  Icon(Icons.emoji_events_rounded, color: _emeraldDark, size: 20),
+                  Icon(
+                    Icons.emoji_events_rounded,
+                    color: _emeraldDark,
+                    size: 20,
+                  ),
                   SizedBox(width: 10),
                   Expanded(
                     child: Column(
@@ -845,17 +902,24 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF334155)),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF334155),
+                      ),
                       children: [
                         const TextSpan(text: 'Technical Score: '),
                         TextSpan(
                           text: '${item.examScore.round()}%',
-                          style: const TextStyle(fontWeight: FontWeight.w800, color: _ink),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: _ink,
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  if (item.reviewerFeedback != null && item.reviewerFeedback!.isNotEmpty)
+                  if (item.reviewerFeedback != null &&
+                      item.reviewerFeedback!.isNotEmpty)
                     Flexible(
                       child: Text(
                         '"${item.reviewerFeedback}"',
@@ -874,7 +938,9 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                       style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w700,
-                        color: item.isPassed ? const Color(0xFF059669) : const Color(0xFFE11D48),
+                        color: item.isPassed
+                            ? const Color(0xFF059669)
+                            : const Color(0xFFE11D48),
                       ),
                     ),
                 ],
@@ -894,7 +960,8 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
               Expanded(
                 child: _buildSpecPill(
                   icon: Icons.code_rounded,
-                  text: '${item.questionCount} ${item.questionCount == 1 ? 'Problem' : 'Problems'}',
+                  text:
+                      '${item.questionCount} ${item.questionCount == 1 ? 'Problem' : 'Problems'}',
                 ),
               ),
             ],
@@ -936,16 +1003,24 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                     isSelected
                         ? 'Interview Selected'
                         : isCompleted
-                            ? 'Submitted'
-                            : isBlocked
-                                ? 'Blocked'
-                                : isExpired
-                                    ? 'Expired'
-                                    : 'Assigned',
-                    style: const TextStyle(fontSize: 10.5, color: _muted, fontWeight: FontWeight.w600),
+                        ? 'Submitted'
+                        : isBlocked
+                        ? 'Blocked'
+                        : isExpired
+                        ? 'Expired'
+                        : 'Assigned',
+                    style: const TextStyle(
+                      fontSize: 10.5,
+                      color: _muted,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Text(
-                    _formatDate(isCompleted || isSelected ? (item.submittedAt ?? item.assignedAt) : item.assignedAt),
+                    _formatDate(
+                      isCompleted || isSelected
+                          ? (item.submittedAt ?? item.assignedAt)
+                          : item.assignedAt,
+                    ),
                     style: const TextStyle(
                       fontSize: 12.5,
                       fontWeight: FontWeight.w700,
@@ -961,8 +1036,13 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                   onPressed: () => _openScorecardModal(item),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: _emeraldDark, width: 1.2),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
                   ),
                   child: Text(
                     isUnderReview ? 'Check Status' : 'View Scorecard',
@@ -975,7 +1055,10 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                 )
               else if (isBlocked)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFFEF2F2),
                     borderRadius: BorderRadius.circular(8),
@@ -983,7 +1066,11 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.block_rounded, size: 13, color: Color(0xFFB91C1C)),
+                      Icon(
+                        Icons.block_rounded,
+                        size: 13,
+                        color: Color(0xFFB91C1C),
+                      ),
                       SizedBox(width: 4),
                       Text(
                         'Cannot Retake',
@@ -998,7 +1085,10 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                 )
               else if (isExpired)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF1F5F9),
                     borderRadius: BorderRadius.circular(8),
@@ -1016,7 +1106,10 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
               else
                 // Action Required without the Start Assessment button
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(20),
@@ -1025,7 +1118,11 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
                   child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.desktop_windows_outlined, size: 13, color: Color(0xFF2563EB)),
+                      Icon(
+                        Icons.desktop_windows_outlined,
+                        size: 13,
+                        color: Color(0xFF2563EB),
+                      ),
                       SizedBox(width: 5),
                       Text(
                         'Take on Desktop / Web',
@@ -1155,12 +1252,18 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
       decoration: BoxDecoration(
         color: isWarning ? const Color(0xFFFEF2F2) : const Color(0xFFF8FAFC),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: isWarning ? const Color(0xFFFECACA) : _border),
+        border: Border.all(
+          color: isWarning ? const Color(0xFFFECACA) : _border,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13, color: isWarning ? const Color(0xFFE11D48) : _muted),
+          Icon(
+            icon,
+            size: 13,
+            color: isWarning ? const Color(0xFFE11D48) : _muted,
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -1170,7 +1273,9 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
               style: TextStyle(
                 fontSize: 11.5,
                 fontWeight: FontWeight.w600,
-                color: isWarning ? const Color(0xFFBE123C) : const Color(0xFF334155),
+                color: isWarning
+                    ? const Color(0xFFBE123C)
+                    : const Color(0xFF334155),
               ),
             ),
           ),
@@ -1209,11 +1314,15 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
 
   Future<void> _loadDetail() async {
     try {
-      final res = await widget.service.getSubmissionDetail(widget.assessment.submissionId);
+      final res = await widget.service.getSubmissionDetail(
+        widget.assessment.submissionId,
+      );
       if (mounted) setState(() => _detail = res);
     } catch (_) {
       if (mounted) {
-        setState(() => _error = 'Could not load extended evaluation scorecard.');
+        setState(
+          () => _error = 'Could not load extended evaluation scorecard.',
+        );
       }
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -1261,14 +1370,20 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: isUnderReview ? const Color(0xFFFFFBEB) : const Color(0xFFECFDF5),
+                  color: isUnderReview
+                      ? const Color(0xFFFFFBEB)
+                      : const Color(0xFFECFDF5),
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isUnderReview ? const Color(0xFFFDE68A) : const Color(0xFFA7F3D0),
+                    color: isUnderReview
+                        ? const Color(0xFFFDE68A)
+                        : const Color(0xFFA7F3D0),
                   ),
                 ),
                 child: Icon(
-                  isUnderReview ? Icons.access_time_rounded : Icons.emoji_events_rounded,
+                  isUnderReview
+                      ? Icons.access_time_rounded
+                      : Icons.emoji_events_rounded,
                   color: isUnderReview ? const Color(0xFFD97706) : _emeraldDark,
                   size: 22,
                 ),
@@ -1286,7 +1401,9 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 0.5,
-                        color: isUnderReview ? const Color(0xFFB45309) : _emeraldDark,
+                        color: isUnderReview
+                            ? const Color(0xFFB45309)
+                            : _emeraldDark,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -1318,14 +1435,15 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
           if (_loading)
             const Padding(
               padding: EdgeInsets.symmetric(vertical: 24),
-              child: Center(
-                child: CircularProgressIndicator(color: _emerald),
-              ),
+              child: Center(child: CircularProgressIndicator(color: _emerald)),
             )
           else if (_error != null)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Text(_error!, style: const TextStyle(color: Color(0xFFE11D48), fontSize: 13)),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: Color(0xFFE11D48), fontSize: 13),
+              ),
             )
           else ...[
             // Status notice
@@ -1342,7 +1460,11 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.hourglass_top_rounded, color: Color(0xFFD97706), size: 16),
+                        Icon(
+                          Icons.hourglass_top_rounded,
+                          color: Color(0xFFD97706),
+                          size: 16,
+                        ),
                         SizedBox(width: 6),
                         Text(
                           'Manual Evaluation in Progress',
@@ -1357,7 +1479,11 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
                     SizedBox(height: 6),
                     Text(
                       'Your code submission has been safely recorded and queued for assessment. An HR representative or technical reviewer will examine your algorithmic solutions, implementation efficiency, and code structure.',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF78350F), height: 1.4),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF78350F),
+                        height: 1.4,
+                      ),
                     ),
                   ],
                 ),
@@ -1370,7 +1496,9 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
                     child: _buildScoreTile(
                       title: 'Technical Score',
                       score: '${(_detail?.examScore ?? a.examScore).round()}%',
-                      color: a.isPassed ? _emeraldDark : const Color(0xFFE11D48),
+                      color: a.isPassed
+                          ? _emeraldDark
+                          : const Color(0xFFE11D48),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -1433,7 +1561,11 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.auto_awesome_rounded, color: _emeraldDark, size: 18),
+                      Icon(
+                        Icons.auto_awesome_rounded,
+                        color: _emeraldDark,
+                        size: 18,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -1462,9 +1594,14 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                child: const Text('Close', style: TextStyle(fontWeight: FontWeight.w700)),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ),
           ],
@@ -1492,7 +1629,11 @@ class _ScorecardBottomSheetState extends State<_ScorecardBottomSheet> {
           const SizedBox(height: 2),
           Text(
             score,
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: color),
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
           ),
         ],
       ),

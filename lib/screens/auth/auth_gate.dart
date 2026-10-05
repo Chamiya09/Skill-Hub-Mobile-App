@@ -14,6 +14,8 @@ class AuthGate extends StatefulWidget {
 }
 
 class _AuthGateState extends State<AuthGate> {
+  static const _minimumLoadingDuration = Duration(milliseconds: 1100);
+
   final AuthService _authService = AuthService();
   AuthSession? _session;
   bool _restoring = true;
@@ -25,10 +27,15 @@ class _AuthGateState extends State<AuthGate> {
   }
 
   Future<void> _restore() async {
+    final loadingTimer = Stopwatch()..start();
     AuthSession? session;
     try {
       session = await _authService.restoreSession();
     } finally {
+      final remaining = _minimumLoadingDuration - loadingTimer.elapsed;
+      if (remaining > Duration.zero) {
+        await Future<void>.delayed(remaining);
+      }
       if (mounted) {
         setState(() {
           _session = session;

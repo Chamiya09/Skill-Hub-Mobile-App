@@ -1,9 +1,55 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:skill_hub_mobile_app/components/skill_hub_loading_indicator.dart';
 import 'package:skill_hub_mobile_app/config/api_config.dart';
 import 'package:skill_hub_mobile_app/models/job.dart';
+import 'package:skill_hub_mobile_app/screens/auth/loading_screen.dart';
 import 'package:skill_hub_mobile_app/screens/candidate/candidate_main_scaffold.dart';
 
 void main() {
+  testWidgets('shows the animated SkillHub loading state', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: LoadingScreen()));
+
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label == 'Loading SkillHub',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.auto_awesome_outlined), findsOneWidget);
+    expect(find.text('SkillHub'), findsOneWidget);
+
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('uses the SkillHub animation for assessment loading', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SkillHubLoadingIndicator(
+              message: 'Loading assigned technical assessments...',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.text('Loading assigned technical assessments...'),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.auto_awesome_outlined), findsOneWidget);
+    expect(find.text('SkillHub'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 450));
+    expect(tester.takeException(), isNull);
+  });
+
   test('maps the public jobs API response', () {
     final job = Job.fromJson({
       'id': 'job-1',
@@ -39,7 +85,9 @@ void main() {
     final expiredJob = Job.fromJson({
       'id': 'job-3',
       'title': 'Frontend Developer',
-      'deadline': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+      'deadline': DateTime.now()
+          .subtract(const Duration(days: 2))
+          .toIso8601String(),
     });
     expect(expiredJob.deadline, isNotNull);
     expect(expiredJob.isDeadlinePassed, isTrue);
@@ -59,9 +107,6 @@ void main() {
       queryParameters: {'limit': '6'},
     );
 
-    expect(
-      endpoint.toString(),
-      'http://10.0.2.2:5155/api/public/jobs?limit=6',
-    );
+    expect(endpoint.toString(), 'http://10.0.2.2:5155/api/public/jobs?limit=6');
   });
 }
