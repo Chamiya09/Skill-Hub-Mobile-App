@@ -80,7 +80,9 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: _selectedIndex == 3
+            ? const Color(0xFFF2F7F5)
+            : Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -166,7 +168,11 @@ class _CreativeTopTitle extends StatelessWidget {
   static const _pages = [
     (Icons.assignment_rounded, 'Assessments', 'Show what you can do'),
     (Icons.calendar_month_rounded, 'Interviews', 'Your next conversations'),
-    (Icons.person_rounded, 'My Account', 'Profile, activity & security'),
+    (
+      Icons.person_outline_rounded,
+      'My Account',
+      'Profile, activity & security',
+    ),
   ];
 
   @override
@@ -208,7 +214,7 @@ class _CreativeTopTitle extends StatelessWidget {
                   greeting.toUpperCase(),
                   style: const TextStyle(
                     color: _emerald,
-                    fontSize: 9,
+                    fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1,
                   ),
@@ -233,58 +239,38 @@ class _CreativeTopTitle extends StatelessWidget {
     }
 
     final page = _pages[pageIndex - 1];
-    return Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF10B981), Color(0xFF047857)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(page.$1, color: _emeraldDark, size: 12),
+            const SizedBox(width: 5),
+            Text(
+              page.$3.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: _emeraldDark,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
+              ),
             ),
-            borderRadius: BorderRadius.circular(13),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x3310B981),
-                blurRadius: 12,
-                offset: Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Icon(page.$1, color: Colors.white, size: 21),
+          ],
         ),
-        const SizedBox(width: 11),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                page.$3.toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: _emerald,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                page.$2,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Color(0xFF0F172A),
-                  fontSize: 21,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ],
+        const SizedBox(height: 1),
+        Text(
+          page.$2,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Color(0xFF0F172A),
+            fontSize: 26,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.7,
           ),
         ),
       ],
@@ -309,102 +295,154 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: const Color(0xFFF8FAFC),
+      color: const Color(0xFFF2F7F5),
       child: ListView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 18, 16, 28),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            clipBehavior: Clip.antiAlias,
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [
-                  Color(0xFF047857),
-                  Color(0xFF059669),
-                  Color(0xFF10B981),
+                  Color(0xFF064E3B),
+                  Color(0xFF047B68),
+                  Color(0xFF0F8F83),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(21),
+              borderRadius: BorderRadius.circular(22),
               boxShadow: const [
                 BoxShadow(
-                  color: Color(0x2410B981),
-                  blurRadius: 16,
-                  offset: Offset(0, 6),
+                  color: Color(0x24134E4A),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
                 ),
               ],
             ),
-            child: Row(
+            child: Stack(
               children: [
-                Container(
-                  width: 54,
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: const Color(0x26FFFFFF),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0x55FFFFFF)),
-                  ),
-                  child: Center(
-                    child: Text(
-                      user.firstName.characters.first.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                      ),
+                Positioned(
+                  right: -47,
+                  top: 8,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0x18FFFFFF)),
                     ),
                   ),
                 ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.fullName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.2,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        user.email,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Color(0xE6FFFFFF),
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 9,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0x1FFFFFFF),
-                          borderRadius: BorderRadius.circular(999),
-                          border: Border.all(color: const Color(0x55FFFFFF)),
-                        ),
-                        child: const Text(
-                          'VERIFIED CANDIDATE',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 8,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.55,
+                Positioned(
+                  right: -24,
+                  top: 31,
+                  child: Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0x14FFFFFF)),
+                    ),
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 58,
+                          height: 58,
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0x30FFFFFF),
+                            border: Border.all(color: const Color(0xAAFFFFFF)),
+                          ),
+                          child: DecoratedBox(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFFC5E9DD),
+                            ),
+                            child: Center(
+                              child: Text(
+                                user.firstName.characters.first.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Color(0xFF064E3B),
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.fullName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                user.email,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xD9FFFFFF),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 4,
                       ),
-                    ],
-                  ),
+                      decoration: BoxDecoration(
+                        color: const Color(0x1FFFFFFF),
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: const Color(0x40FFFFFF)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified_rounded,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            'VERIFIED CANDIDATE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.45,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -413,8 +451,8 @@ class AccountScreen extends StatelessWidget {
           const Text(
             'CAREER CENTER',
             style: TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 10,
+              color: Color(0xFF748B83),
+              fontSize: 9,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.9,
             ),
@@ -456,13 +494,13 @@ class AccountScreen extends StatelessWidget {
             subtitle: 'Review opportunities you saved for later',
             onTap: () => _open(context, SavedJobsScreen(token: token)),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 20),
           OutlinedButton.icon(
             onPressed: onLogout,
             style: OutlinedButton.styleFrom(
               foregroundColor: const Color(0xFFDC2626),
               backgroundColor: Colors.white,
-              side: const BorderSide(color: Color(0xFFFECACA)),
+              side: const BorderSide(color: Color(0xFFF5D4D1)),
               padding: const EdgeInsets.symmetric(vertical: 15),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
@@ -501,26 +539,34 @@ class _AccountMenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(17),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(17),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            border: Border.all(color: const Color(0xFFDCE5EF)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(17),
+            border: Border.all(color: const Color(0xFFE3ECE8)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A173D32),
+                blurRadius: 14,
+                offset: Offset(0, 5),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 43,
+                height: 43,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE9FBF3),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFE7F5EF),
+                  borderRadius: BorderRadius.circular(13),
                 ),
-                child: Icon(icon, color: const Color(0xFF047857), size: 21),
+                child: Icon(icon, color: const Color(0xFF008561), size: 21),
               ),
               const SizedBox(width: 12),
               Expanded(
