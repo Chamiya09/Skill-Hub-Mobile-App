@@ -154,7 +154,6 @@ class _JobViewScreenState extends State<JobViewScreen> {
               job: _job,
               saved: _saved,
               onSave: () => setState(() => _saved = !_saved),
-              onShare: () => _message('Job sharing will be available soon.'),
             ),
             const SizedBox(height: 16),
             if (_job.deadline != null) ...[
@@ -225,12 +224,10 @@ class _HeroCard extends StatelessWidget {
     required this.job,
     required this.saved,
     required this.onSave,
-    required this.onShare,
   });
   final Job job;
   final bool saved;
   final VoidCallback onSave;
-  final VoidCallback onShare;
 
   @override
   Widget build(BuildContext context) {
@@ -299,13 +296,6 @@ class _HeroCard extends StatelessWidget {
                     : Icons.bookmark_border_rounded,
                 active: saved,
                 onTap: onSave,
-                size: 38,
-              ),
-              const SizedBox(width: 6),
-              _HeaderActionButton(
-                tooltip: 'Share job',
-                icon: Icons.ios_share_rounded,
-                onTap: onShare,
                 size: 38,
               ),
             ],
@@ -1073,11 +1063,7 @@ class _DeadlineBanner extends StatelessWidget {
 }
 
 class _Meta extends StatelessWidget {
-  const _Meta({
-    required this.icon,
-    required this.text,
-    this.light = false,
-  });
+  const _Meta({required this.icon, required this.text, this.light = false});
   final IconData icon;
   final String text;
   final bool light;

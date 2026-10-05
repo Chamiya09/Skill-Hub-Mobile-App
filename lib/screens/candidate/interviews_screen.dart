@@ -269,24 +269,6 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
                           ],
                         ),
                       ),
-                      IconButton(
-                        onPressed: _loading ? null : _fetchInterviews,
-                        tooltip: 'Refresh interviews',
-                        icon: _loading
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: _emerald,
-                                ),
-                              )
-                            : const Icon(
-                                Icons.refresh_rounded,
-                                color: _muted,
-                                size: 22,
-                              ),
-                      ),
                     ],
                   ),
                 ),

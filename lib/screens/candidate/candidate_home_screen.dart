@@ -305,7 +305,6 @@ class _TrustHighlights extends StatelessWidget {
         _TrustItem(
           label: isLoading ? 'Loading roles...' : '$activeJobs active roles',
         ),
-        const _TrustItem(label: 'AI matching'),
         const _TrustItem(label: 'Direct employers'),
       ],
     );
@@ -341,11 +340,6 @@ class _FeatureStrip extends StatelessWidget {
   const _FeatureStrip();
 
   static const _features = [
-    (
-      Icons.track_changes_rounded,
-      'AI Match Scoring',
-      'Roles ranked against your skills.',
-    ),
     (
       Icons.bolt_rounded,
       'Instant Applications',
