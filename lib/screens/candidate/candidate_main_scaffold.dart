@@ -67,14 +67,8 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
   Widget build(BuildContext context) {
     final screens = <Widget>[
       const HomeScreen(),
-      AssessmentsScreen(
-        token: widget.token,
-        user: widget.user,
-      ),
-      InterviewsScreen(
-        token: widget.token,
-        user: widget.user,
-      ),
+      AssessmentsScreen(token: widget.token, user: widget.user),
+      InterviewsScreen(token: widget.token, user: widget.user),
       AccountScreen(
         user: widget.user,
         token: widget.token,
@@ -96,38 +90,6 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
           greeting: candidateGreeting(_currentTime),
           firstName: widget.user.firstName,
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: IconButton(
-              tooltip: 'Notifications',
-              onPressed: () {},
-              icon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(
-                    Icons.notifications_outlined,
-                    color: _darkText,
-                    size: 27,
-                  ),
-                  Positioned(
-                    top: -1,
-                    right: -1,
-                    child: Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEF4444),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
       body: IndexedStack(index: _selectedIndex, children: screens),
       bottomNavigationBar: DecoratedBox(
@@ -707,7 +669,8 @@ class _StudyDashboardPageState extends State<_StudyDashboardPage> {
             return const _StudyDataState(
               icon: Icons.menu_book_outlined,
               title: 'No study guides yet',
-              message: 'Role-specific guidelines will appear here when an interview preparation guide is generated for your application.',
+              message:
+                  'Role-specific guidelines will appear here when an interview preparation guide is generated for your application.',
             );
           }
           final safeIndex = _selectedRoleIndex < guides.length
