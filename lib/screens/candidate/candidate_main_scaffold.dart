@@ -298,7 +298,7 @@ class AccountScreen extends StatelessWidget {
       color: const Color(0xFFF2F7F5),
       child: ListView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 4, 16, 28),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
         children: [
           Container(
             clipBehavior: Clip.antiAlias,
@@ -447,7 +447,7 @@ class AccountScreen extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 18),
           const Text(
             'CAREER CENTER',
             style: TextStyle(
@@ -494,7 +494,7 @@ class AccountScreen extends StatelessWidget {
             subtitle: 'Review opportunities you saved for later',
             onTap: () => _open(context, SavedJobsScreen(token: token)),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
           OutlinedButton.icon(
             onPressed: onLogout,
             style: OutlinedButton.styleFrom(
@@ -544,7 +544,7 @@ class _AccountMenuCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(17),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(17),
