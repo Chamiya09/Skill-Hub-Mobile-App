@@ -184,7 +184,9 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
         onRefresh: _fetchAssessments,
         color: _emerald,
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             // 1. Top Dashboard Header & Performance Overview
             SliverToBoxAdapter(

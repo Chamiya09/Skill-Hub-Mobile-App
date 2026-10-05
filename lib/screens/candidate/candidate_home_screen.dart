@@ -99,9 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         letterSpacing: -1,
                       ),
                       children: [
-                        TextSpan(text: 'Find your next role with '),
+                        TextSpan(text: 'Build skills prove your ability.'),
                         TextSpan(
-                          text: 'AI precision',
+                          text: 'Land the right role',
                           style: TextStyle(color: _emeraldDark),
                         ),
                       ],

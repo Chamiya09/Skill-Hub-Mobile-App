@@ -179,7 +179,9 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
         onRefresh: _fetchInterviews,
         color: _emerald,
         child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           slivers: [
             // Top Section Header
             SliverToBoxAdapter(
@@ -962,123 +964,113 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
   // ==========================================
   Widget _buildHiredCelebrationCard(CandidateInterview interview) {
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: _cardBg,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF34D399), width: 1.5),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x1F10B981),
-            blurRadius: 18,
-            offset: Offset(0, 6),
+            color: Color(0x0D0F172A),
+            blurRadius: 16,
+            offset: Offset(0, 5),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Festive Celebratory Hero Banner
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(18),
+            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF064E3B),
-                  Color(0xFF047857),
-                  Color(0xFF059669),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x33064E3B),
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ],
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFA7F3D0)),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                // Festive Gold Ribbon
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0x26FDE68A),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0x59FDE68A)),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome_rounded,
-                        size: 13,
-                        color: Color(0xFFFDE68A),
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        'OFFICIAL HIRING OFFER EXTENDED',
-                        style: TextStyle(
-                          color: Color(0xFFFDE68A),
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                      SizedBox(width: 5),
-                      Icon(
-                        Icons.celebration_rounded,
-                        size: 13,
-                        color: Color(0xFFFDE68A),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Large Heading
-                const Text(
-                  '🎉 Congratulations! You Are Hired!',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                    letterSpacing: -0.3,
-                  ),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Congratulatory Body Text
+                Icon(Icons.circle, size: 7, color: _emerald),
+                SizedBox(width: 7),
                 Text(
-                  interview.hiredMessage ??
-                      'We are thrilled to inform you that following your outstanding performance, the hiring committee has officially selected and hired you for the ${interview.jobTitle} position at ${interview.companyName}!',
-                  style: const TextStyle(
-                    fontSize: 12.5,
-                    color: Color(0xFFE6FFFA),
-                    height: 1.45,
-                    fontWeight: FontWeight.w500,
+                  'OFFER CONFIRMED',
+                  style: TextStyle(
+                    color: _emeraldDark,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
                   ),
                 ),
               ],
             ),
           ),
-
+          const SizedBox(height: 28),
+          const Text(
+            'WELCOME TO THE TEAM',
+            style: TextStyle(
+              color: _emerald,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            "Congratulations,\nyou're hired.",
+            style: TextStyle(
+              color: _ink,
+              fontSize: 31,
+              fontWeight: FontWeight.w600,
+              height: 1.04,
+              letterSpacing: -1.1,
+            ),
+          ),
           const SizedBox(height: 16),
-
-          // 2. Badges Row: Hired & Selected + Officially Hired
+          Text(
+            interview.hiredMessage ??
+                "Congratulations! You've been selected and officially hired for this role.",
+            style: const TextStyle(
+              color: Color(0xFF64748B),
+              fontSize: 13,
+              height: 1.65,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 11,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.emoji_events_rounded,
+                      size: 15,
+                      color: Color(0xFF3CB371),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Hired & Selected',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF3CB371),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 11,
@@ -1089,56 +1081,18 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: const Color(0xFFA7F3D0)),
                 ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.emoji_events_rounded,
-                      size: 15,
-                      color: _emeraldDark,
-                    ),
-                    SizedBox(width: 6),
-                    Text(
-                      'Hired & Selected',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: _emeraldDark,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 11,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF047857),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Officially Hired 🎉',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+                child: const Text(
+                  'Officially Hired ',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: _emeraldDark,
+                  ),
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 14),
-
-          // 3. Role & Company details
           Text(
             interview.jobTitle,
             style: const TextStyle(
@@ -1149,14 +1103,16 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Row(
+          Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 5,
+            runSpacing: 6,
             children: [
               const Icon(
                 Icons.business_rounded,
                 size: 15,
-                color: Color(0xFF94A3B8),
+                color: Color(0xFF64748B),
               ),
-              const SizedBox(width: 5),
               Text(
                 interview.companyName,
                 style: const TextStyle(
@@ -1166,8 +1122,7 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
                 ),
               ),
               if (interview.department != null &&
-                  interview.department!.isNotEmpty) ...[
-                const SizedBox(width: 8),
+                  interview.department!.isNotEmpty)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
@@ -1186,29 +1141,25 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
                     ),
                   ),
                 ),
-              ],
             ],
           ),
-
           const SizedBox(height: 16),
-
-          // 4. Next Steps & Onboarding Process Card
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: const Color(0xFFF0FDF4),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFBBF7D0)),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
             ),
-            child: Column(
+            child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
                     Icon(
                       Icons.check_circle_rounded,
                       size: 16,
-                      color: _emeraldDark,
+                      color: Color(0xFF3CB371),
                     ),
                     SizedBox(width: 7),
                     Text(
@@ -1216,34 +1167,31 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF065F46),
+                        color: Color(0xFF3CB371),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                const Text(
+                SizedBox(height: 6),
+                Text(
                   'Our Human Resources and People Operations team will reach out directly to your registered email address with your formal offer letter, onboarding documentation, compensation details, and induction schedule. Welcome to the team!',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF166534),
+                    color: Color.fromARGB(255, 29, 30, 30),
                     height: 1.45,
                   ),
                 ),
               ],
             ),
           ),
-
           const SizedBox(height: 16),
-
-          // 5. Bottom Welcome Banner
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             decoration: BoxDecoration(
-              color: const Color(0xFFECFDF5),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFA7F3D0)),
+              border: Border.all(color: const Color(0xFFE5E7EB)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1251,22 +1199,25 @@ class _InterviewsScreenState extends State<InterviewsScreen> {
                 const Icon(
                   Icons.auto_awesome_rounded,
                   size: 16,
-                  color: _emeraldDark,
+                  color: Color(0xFF3CB371),
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  'Welcome to ${interview.companyName}!',
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w800,
-                    color: _emeraldDark,
+                Flexible(
+                  child: Text(
+                    'Welcome to ${interview.companyName}!',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF3CB371),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 const Icon(
                   Icons.celebration_rounded,
                   size: 16,
-                  color: _emeraldDark,
+                  color: Color(0xFF3CB371),
                 ),
               ],
             ),
