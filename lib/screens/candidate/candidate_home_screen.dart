@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../components/company_logo_button.dart';
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
 import 'find_jobs_screen.dart';
@@ -87,8 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
               sliver: SliverList.list(
                 children: [
                   const SizedBox(height: 8),
-                  const _HeroBadge(),
-                  const SizedBox(height: 18),
                   RichText(
                     textAlign: TextAlign.center,
                     text: const TextSpan(
@@ -179,40 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroBadge extends StatelessWidget {
-  const _HeroBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: const Color(0xFFECFDF5),
-          border: Border.all(color: const Color(0xFFA7F3D0)),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.auto_awesome_rounded, color: _emeraldDark, size: 14),
-            SizedBox(width: 6),
-            Text(
-              'AI-POWERED RECRUITMENT',
-              style: TextStyle(
-                color: _emeraldDark,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.7,
               ),
             ),
           ],
@@ -689,7 +654,10 @@ class _JobCard extends StatelessWidget {
                       children: [
                         Text(
                           job.postedLabel,
-                          style: const TextStyle(color: _bodyText, fontSize: 11),
+                          style: const TextStyle(
+                            color: _bodyText,
+                            fontSize: 11,
+                          ),
                         ),
                         if (job.deadline != null) ...[
                           const Text(
@@ -759,20 +727,17 @@ class _JobsLoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        3,
-        (index) => Container(
-          height: 218,
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(color: _emerald, strokeWidth: 2.5),
-          ),
+    return Container(
+      height: 218,
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Center(
+        child: SkillHubLoadingIndicator(
+          message: 'Finding live opportunities...',
         ),
       ),
     );

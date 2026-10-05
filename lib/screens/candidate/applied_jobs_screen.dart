@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../components/company_logo_button.dart';
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../models/candidate_application.dart';
 import '../../services/candidate_applications_service.dart';
 import 'find_jobs_screen.dart';
@@ -143,7 +144,14 @@ class _AppliedJobsScreenState extends State<AppliedJobsScreen> {
             const SizedBox(height: 18),
             if (_error != null) _ErrorCard(message: _error!, onRetry: _load),
             if (_loading)
-              ...List.generate(3, (_) => const _ApplicationSkeleton()),
+              const SizedBox(
+                height: 260,
+                child: Center(
+                  child: SkillHubLoadingIndicator(
+                    message: 'Loading your applied jobs...',
+                  ),
+                ),
+              ),
             if (!_loading && _error == null && _applications.isEmpty)
               _EmptyState(onExplore: _openFindJobs),
             if (!_loading && _error == null)
@@ -937,23 +945,6 @@ class _Meta extends StatelessWidget {
         style: const TextStyle(color: _muted, fontSize: 10.5),
       ),
     ],
-  );
-}
-
-class _ApplicationSkeleton extends StatelessWidget {
-  const _ApplicationSkeleton();
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 210,
-    margin: const EdgeInsets.only(bottom: 13),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      border: Border.all(color: const Color(0xFFF1F5F9)),
-      borderRadius: BorderRadius.circular(18),
-    ),
-    child: const Center(
-      child: CircularProgressIndicator(color: _emerald, strokeWidth: 2.3),
-    ),
   );
 }
 

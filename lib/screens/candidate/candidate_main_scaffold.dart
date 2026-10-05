@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../models/auth_session.dart';
 import 'applied_jobs_screen.dart';
 import 'saved_jobs_screen.dart';
@@ -650,7 +651,9 @@ class _StudyDashboardPageState extends State<_StudyDashboardPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: _emerald),
+              child: SkillHubLoadingIndicator(
+                message: 'Loading your study dashboard...',
+              ),
             );
           }
           if (snapshot.hasError) {

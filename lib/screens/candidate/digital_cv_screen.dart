@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../services/candidate_cv_service.dart';
 
 const _emerald = Color(0xFF10B981);
@@ -116,8 +117,13 @@ class _DigitalCvScreenState extends State<DigitalCvScreen> {
         future: _profileFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: _emerald),
+            return const ColoredBox(
+              color: _surface,
+              child: Center(
+                child: SkillHubLoadingIndicator(
+                  message: 'Loading your digital CV...',
+                ),
+              ),
             );
           }
           if (snapshot.hasError) {
