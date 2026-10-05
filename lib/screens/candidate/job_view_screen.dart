@@ -342,17 +342,6 @@ class _HeroCard extends StatelessWidget {
                   text: job.experienceLevel,
                   light: true,
                 ),
-              if (job.deadline != null)
-                _Meta(
-                  icon: Icons.access_time_rounded,
-                  text: job.isDeadlinePassed
-                      ? 'Deadline Passed'
-                      : 'Deadline: ${job.formattedDeadline}',
-                  light: true,
-                  customColor: job.isDeadlinePassed
-                      ? const Color(0xFFFECACA)
-                      : const Color(0xFFFEF3C7),
-                ),
             ],
           ),
           if (job.tags.isNotEmpty || job.department.isNotEmpty) ...[
@@ -716,8 +705,8 @@ class _OverviewCard extends StatelessWidget {
           value: job.isDeadlinePassed
               ? 'Applications closed'
               : (job.status == 'Active'
-                  ? 'Active & accepting applications'
-                  : job.status),
+                    ? 'Active & accepting applications'
+                    : job.status),
           last: true,
           active: job.status == 'Active' && !job.isDeadlinePassed,
           warning: job.isDeadlinePassed,
@@ -891,7 +880,9 @@ class _ApplyCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isExpired ? 'Applications are closed' : 'Interested in this position?',
+            isExpired
+                ? 'Applications are closed'
+                : 'Interested in this position?',
             style: const TextStyle(
               color: _ink,
               fontSize: 17,
@@ -917,10 +908,12 @@ class _ApplyCard extends StatelessWidget {
               onPressed: (applied || isExpired) ? null : onApply,
               style: FilledButton.styleFrom(
                 backgroundColor: isExpired ? const Color(0xFFFEF2F2) : _emerald,
-                disabledBackgroundColor:
-                    isExpired ? const Color(0xFFFEF2F2) : const Color(0xFFF1F5F9),
-                disabledForegroundColor:
-                    isExpired ? const Color(0xFFDC2626) : _body,
+                disabledBackgroundColor: isExpired
+                    ? const Color(0xFFFEF2F2)
+                    : const Color(0xFFF1F5F9),
+                disabledForegroundColor: isExpired
+                    ? const Color(0xFFDC2626)
+                    : _body,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
                   side: isExpired
@@ -931,7 +924,9 @@ class _ApplyCard extends StatelessWidget {
               icon: Icon(
                 isExpired
                     ? Icons.timer_off_outlined
-                    : (applied ? Icons.check_circle_rounded : Icons.send_rounded),
+                    : (applied
+                          ? Icons.check_circle_rounded
+                          : Icons.send_rounded),
                 size: 19,
               ),
               label: Text(
@@ -965,12 +960,24 @@ class _DeadlineBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isExpired = job.isDeadlinePassed;
-    final bgColor = isExpired ? const Color(0xFFFEF2F2) : const Color(0xFFFFFBEB);
-    final borderColor = isExpired ? const Color(0xFFFECACA) : const Color(0xFFFDE68A);
-    final iconBgColor = isExpired ? const Color(0xFFFEE2E2) : const Color(0xFFFEF3C7);
-    final iconColor = isExpired ? const Color(0xFFEF4444) : const Color(0xFFD97706);
-    final eyebrowColor = isExpired ? const Color(0xFFB91C1C) : const Color(0xFF92400E);
-    final textColor = isExpired ? const Color(0xFF991B1B) : const Color(0xFF78350F);
+    final bgColor = isExpired
+        ? const Color(0xFFFEF2F2)
+        : const Color(0xFFFFFBEB);
+    final borderColor = isExpired
+        ? const Color(0xFFFECACA)
+        : const Color(0xFFFDE68A);
+    final iconBgColor = isExpired
+        ? const Color(0xFFFEE2E2)
+        : const Color(0xFFFEF3C7);
+    final iconColor = isExpired
+        ? const Color(0xFFEF4444)
+        : const Color(0xFFD97706);
+    final eyebrowColor = isExpired
+        ? const Color(0xFFB91C1C)
+        : const Color(0xFF92400E);
+    final textColor = isExpired
+        ? const Color(0xFF991B1B)
+        : const Color(0xFF78350F);
 
     return Container(
       width: double.infinity,
@@ -1040,7 +1047,10 @@ class _DeadlineBanner extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFEF4444),
                   borderRadius: BorderRadius.circular(999),
@@ -1067,16 +1077,13 @@ class _Meta extends StatelessWidget {
     required this.icon,
     required this.text,
     this.light = false,
-    this.customColor,
   });
   final IconData icon;
   final String text;
   final bool light;
-  final Color? customColor;
   @override
   Widget build(BuildContext context) {
-    final effectiveColor =
-        customColor ?? (light ? const Color(0xE6FFFFFF) : _body);
+    final effectiveColor = light ? const Color(0xE6FFFFFF) : _body;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
