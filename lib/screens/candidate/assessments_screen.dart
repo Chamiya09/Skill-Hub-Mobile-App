@@ -89,21 +89,26 @@ class _AssessmentsScreenState extends State<AssessmentsScreen> {
       final isExpired = item.checkIsExpired;
       final isPending = item.isActionRequired;
 
-      if (_activeTab == _AssessmentFilterTab.pending && !isPending)
+      if (_activeTab == _AssessmentFilterTab.pending && !isPending) {
         return false;
-      if (_activeTab == _AssessmentFilterTab.completed && !isCompleted)
+      }
+      if (_activeTab == _AssessmentFilterTab.completed && !isCompleted) {
         return false;
+      }
       if (_activeTab == _AssessmentFilterTab.expired &&
           !isExpired &&
-          !isBlocked)
+          !isBlocked) {
         return false;
+      }
 
       if (_searchQuery.trim().isNotEmpty) {
         final q = _searchQuery.trim().toLowerCase();
         final matchJob = item.jobTitle.toLowerCase().contains(q);
         final matchCompany = item.companyName.toLowerCase().contains(q);
         final matchTrack = item.assessmentTitle.toLowerCase().contains(q);
-        if (!matchJob && !matchCompany && !matchTrack) return false;
+        if (!matchJob && !matchCompany && !matchTrack) {
+          return false;
+        }
       }
 
       return true;
