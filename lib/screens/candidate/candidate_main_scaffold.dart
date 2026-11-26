@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../models/auth_session.dart';
 import 'applied_jobs_screen.dart';
 import 'saved_jobs_screen.dart';
@@ -67,14 +68,8 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
   Widget build(BuildContext context) {
     final screens = <Widget>[
       const HomeScreen(),
-      AssessmentsScreen(
-        token: widget.token,
-        user: widget.user,
-      ),
-      InterviewsScreen(
-        token: widget.token,
-        user: widget.user,
-      ),
+      AssessmentsScreen(token: widget.token, user: widget.user),
+      InterviewsScreen(token: widget.token, user: widget.user),
       AccountScreen(
         user: widget.user,
         token: widget.token,
@@ -85,7 +80,9 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: _selectedIndex == 3
+            ? const Color(0xFFF2F7F5)
+            : Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -96,38 +93,6 @@ class _CandidateMainScaffoldState extends State<CandidateMainScaffold> {
           greeting: candidateGreeting(_currentTime),
           firstName: widget.user.firstName,
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: IconButton(
-              tooltip: 'Notifications',
-              onPressed: () {},
-              icon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(
-                    Icons.notifications_outlined,
-                    color: _darkText,
-                    size: 27,
-                  ),
-                  Positioned(
-                    top: -1,
-                    right: -1,
-                    child: Container(
-                      width: 9,
-                      height: 9,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEF4444),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 1.5),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
       ),
       body: IndexedStack(index: _selectedIndex, children: screens),
       bottomNavigationBar: DecoratedBox(
@@ -203,7 +168,11 @@ class _CreativeTopTitle extends StatelessWidget {
   static const _pages = [
     (Icons.assignment_rounded, 'Assessments', 'Show what you can do'),
     (Icons.calendar_month_rounded, 'Interviews', 'Your next conversations'),
-    (Icons.person_rounded, 'My Account', 'Profile, activity & security'),
+    (
+      Icons.person_outline_rounded,
+      'My Account',
+      'Profile, activity & security',
+    ),
   ];
 
   @override
@@ -245,7 +214,7 @@ class _CreativeTopTitle extends StatelessWidget {
                   greeting.toUpperCase(),
                   style: const TextStyle(
                     color: _emerald,
-                    fontSize: 9,
+                    fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1,
                   ),
@@ -270,58 +239,38 @@ class _CreativeTopTitle extends StatelessWidget {
     }
 
     final page = _pages[pageIndex - 1];
-    return Row(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: 42,
-          height: 42,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF10B981), Color(0xFF047857)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(page.$1, color: _emeraldDark, size: 12),
+            const SizedBox(width: 5),
+            Text(
+              page.$3.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: _emeraldDark,
+                fontSize: 10,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 0.4,
+              ),
             ),
-            borderRadius: BorderRadius.circular(13),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x3310B981),
-                blurRadius: 12,
-                offset: Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Icon(page.$1, color: Colors.white, size: 21),
+          ],
         ),
-        const SizedBox(width: 11),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                page.$3.toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: _emerald,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                page.$2,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  color: Color(0xFF0F172A),
-                  fontSize: 21,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ],
+        const SizedBox(height: 1),
+        Text(
+          page.$2,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Color(0xFF0F172A),
+            fontSize: 26,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.7,
           ),
         ),
       ],
@@ -345,166 +294,226 @@ class AccountScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 28),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(18),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF047857), Color(0xFF10B981)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(22),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x3310B981),
-                blurRadius: 18,
-                offset: Offset(0, 7),
+    return ColoredBox(
+      color: const Color(0xFFF2F7F5),
+      child: ListView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+        children: [
+          Container(
+            clipBehavior: Clip.antiAlias,
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [
+                  Color(0xFF064E3B),
+                  Color(0xFF047B68),
+                  Color(0xFF0F8F83),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 58,
-                height: 58,
-                decoration: BoxDecoration(
-                  color: const Color(0x26FFFFFF),
-                  borderRadius: BorderRadius.circular(17),
-                  border: Border.all(color: const Color(0x33FFFFFF)),
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x24134E4A),
+                  blurRadius: 20,
+                  offset: Offset(0, 8),
                 ),
-                child: Center(
-                  child: Text(
-                    user.firstName.characters.first.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 25,
-                      fontWeight: FontWeight.w900,
+              ],
+            ),
+            child: Stack(
+              children: [
+                Positioned(
+                  right: -47,
+                  top: 8,
+                  child: Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0x18FFFFFF)),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
+                Positioned(
+                  right: -24,
+                  top: 31,
+                  child: Container(
+                    width: 104,
+                    height: 104,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0x14FFFFFF)),
+                    ),
+                  ),
+                ),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      user.fullName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w900,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 58,
+                          height: 58,
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: const Color(0x30FFFFFF),
+                            border: Border.all(color: const Color(0xAAFFFFFF)),
+                          ),
+                          child: DecoratedBox(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Color(0xFFC5E9DD),
+                            ),
+                            child: Center(
+                              child: Text(
+                                user.firstName.characters.first.toUpperCase(),
+                                style: const TextStyle(
+                                  color: Color(0xFF064E3B),
+                                  fontSize: 23,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user.fullName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                user.email,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xD9FFFFFF),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      user.email,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Color(0xD9FFFFFF),
-                        fontSize: 12,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 14),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 9,
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0x26FFFFFF),
+                        color: const Color(0x1FFFFFFF),
                         borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: const Color(0x33FFFFFF)),
+                        border: Border.all(color: const Color(0x40FFFFFF)),
                       ),
-                      child: const Text(
-                        'VERIFIED CANDIDATE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 8,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.5,
-                        ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified_rounded,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          SizedBox(width: 5),
+                          Text(
+                            'VERIFIED CANDIDATE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.45,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          const Text(
+            'CAREER CENTER',
+            style: TextStyle(
+              color: Color(0xFF748B83),
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 0.9,
+            ),
+          ),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.badge_outlined,
+            title: 'My Digital CV',
+            subtitle: 'Manage your verified professional profile',
+            onTap: () => _open(context, DigitalCvScreen(token: token)),
+          ),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.school_outlined,
+            title: 'Study Dashboard',
+            subtitle: 'Prepare for assessments and interviews',
+            onTap: () => _open(context, _StudyDashboardPage(token: token)),
+          ),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.work_outline_rounded,
+            title: 'Applied Jobs',
+            subtitle: 'Track your submitted job applications',
+            onTap: () => _open(
+              context,
+              AppliedJobsScreen(
+                token: token,
+                onOpenAssessments: () {
+                  Navigator.of(context).pop();
+                  onOpenAssessments();
+                },
               ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        const Text(
-          'CAREER CENTER',
-          style: TextStyle(
-            color: Color(0xFF94A3B8),
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
-            letterSpacing: 0.8,
-          ),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.badge_outlined,
-          title: 'My Digital CV',
-          subtitle: 'Manage your verified professional profile',
-          onTap: () => _open(context, DigitalCvScreen(token: token)),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.school_outlined,
-          title: 'Study Dashboard',
-          subtitle: 'Prepare for assessments and interviews',
-          onTap: () => _open(context, _StudyDashboardPage(token: token)),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.work_outline_rounded,
-          title: 'Applied Jobs',
-          subtitle: 'Track your submitted job applications',
-          onTap: () => _open(
-            context,
-            AppliedJobsScreen(
-              token: token,
-              onOpenAssessments: () {
-                Navigator.of(context).pop();
-                onOpenAssessments();
-              },
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-        _AccountMenuCard(
-          icon: Icons.bookmark_border_rounded,
-          title: 'Saved Jobs',
-          subtitle: 'Review opportunities you saved for later',
-          onTap: () => _open(context, SavedJobsScreen(token: token)),
-        ),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: onLogout,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFFDC2626),
-            backgroundColor: Colors.white,
-            side: const BorderSide(color: Color(0xFFFECACA)),
-            padding: const EdgeInsets.symmetric(vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(13),
+          const SizedBox(height: 10),
+          _AccountMenuCard(
+            icon: Icons.bookmark_border_rounded,
+            title: 'Saved Jobs',
+            subtitle: 'Review opportunities you saved for later',
+            onTap: () => _open(context, SavedJobsScreen(token: token)),
+          ),
+          const SizedBox(height: 18),
+          OutlinedButton.icon(
+            onPressed: onLogout,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: const Color(0xFFDC2626),
+              backgroundColor: Colors.white,
+              side: const BorderSide(color: Color(0xFFF5D4D1)),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.logout_rounded, size: 18),
+            label: const Text(
+              'Sign out of Skill Hub',
+              style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
-          icon: const Icon(Icons.logout_rounded, size: 19),
-          label: const Text(
-            'Sign out of Skill Hub',
-            style: TextStyle(fontWeight: FontWeight.w700),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -530,28 +539,36 @@ class _AccountMenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(17),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(17),
         child: Container(
-          padding: const EdgeInsets.all(15),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(17),
+            border: Border.all(color: const Color(0xFFE3ECE8)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A173D32),
+                blurRadius: 14,
+                offset: Offset(0, 5),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
+                width: 43,
+                height: 43,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFECFDF5),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFE7F5EF),
+                  borderRadius: BorderRadius.circular(13),
                 ),
-                child: Icon(icon, color: const Color(0xFF047857), size: 22),
+                child: Icon(icon, color: const Color(0xFF008561), size: 21),
               ),
-              const SizedBox(width: 13),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -559,14 +576,16 @@ class _AccountMenuCard extends StatelessWidget {
                     Text(
                       title,
                       style: const TextStyle(
-                        color: _darkText,
+                        color: Color(0xFF172033),
                         fontSize: 14,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Color(0xFF64748B),
                         fontSize: 11,
@@ -575,7 +594,12 @@ class _AccountMenuCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8)),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFF8A9AAF),
+                size: 22,
+              ),
             ],
           ),
         ),
@@ -688,7 +712,9 @@ class _StudyDashboardPageState extends State<_StudyDashboardPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-              child: CircularProgressIndicator(color: _emerald),
+              child: SkillHubLoadingIndicator(
+                message: 'Loading your study dashboard...',
+              ),
             );
           }
           if (snapshot.hasError) {
@@ -707,7 +733,8 @@ class _StudyDashboardPageState extends State<_StudyDashboardPage> {
             return const _StudyDataState(
               icon: Icons.menu_book_outlined,
               title: 'No study guides yet',
-              message: 'Role-specific guidelines will appear here when an interview preparation guide is generated for your application.',
+              message:
+                  'Role-specific guidelines will appear here when an interview preparation guide is generated for your application.',
             );
           }
           final safeIndex = _selectedRoleIndex < guides.length

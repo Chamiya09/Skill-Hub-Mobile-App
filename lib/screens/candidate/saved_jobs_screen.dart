@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../components/company_logo_button.dart';
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../models/job.dart';
 import '../../models/saved_job.dart';
 import '../../services/saved_jobs_service.dart';
@@ -157,7 +158,15 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
           _Hero(count: _jobs.length, onBrowse: _browse),
           const SizedBox(height: 18),
           if (_error != null) _ErrorCard(message: _error!, onRetry: _load),
-          if (_loading) ...List.generate(3, (_) => const _Skeleton()),
+          if (_loading)
+            const SizedBox(
+              height: 260,
+              child: Center(
+                child: SkillHubLoadingIndicator(
+                  message: 'Loading your saved jobs...',
+                ),
+              ),
+            ),
           if (!_loading && _error == null && _jobs.isEmpty)
             _EmptyState(onBrowse: _browse),
           if (!_loading && _error == null)
@@ -177,8 +186,9 @@ class _SavedJobsScreenState extends State<SavedJobsScreen> {
     ),
   );
 
-  void _browse() => Navigator.of(context)
-      .push(MaterialPageRoute<void>(builder: (_) => const FindJobsScreen()));
+  void _browse() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (_) => const FindJobsScreen()));
   void _view(SavedJob saved) {
     final job = Job(
       id: saved.jobId,
@@ -530,23 +540,6 @@ class _Meta extends StatelessWidget {
         style: const TextStyle(color: _muted, fontSize: 11),
       ),
     ],
-  );
-}
-
-class _Skeleton extends StatelessWidget {
-  const _Skeleton();
-  @override
-  Widget build(BuildContext context) => Container(
-    height: 265,
-    margin: const EdgeInsets.only(bottom: 13),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: const Color(0xFFF1F5F9)),
-    ),
-    child: const Center(
-      child: CircularProgressIndicator(color: _emerald, strokeWidth: 2.3),
-    ),
   );
 }
 

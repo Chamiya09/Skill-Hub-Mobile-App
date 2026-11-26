@@ -629,9 +629,47 @@ class _ResultJobCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    job.postedLabel,
-                    style: const TextStyle(color: _muted, fontSize: 10),
+                  Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 4,
+                    runSpacing: 2,
+                    children: [
+                      Text(
+                        job.postedLabel,
+                        style: const TextStyle(color: _muted, fontSize: 10),
+                      ),
+                      if (job.deadline != null) ...[
+                        const Text(
+                          '•',
+                          style: TextStyle(color: _muted, fontSize: 10),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.access_time_rounded,
+                              size: 11,
+                              color: job.isDeadlinePassed
+                                  ? const Color(0xFFEF4444)
+                                  : const Color(0xFFD97706),
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              job.isDeadlinePassed
+                                  ? 'Deadline passed'
+                                  : 'Deadline: ${job.shortDeadlineLabel}',
+                              style: TextStyle(
+                                color: job.isDeadlinePassed
+                                    ? const Color(0xFFEF4444)
+                                    : const Color(0xFFD97706),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),

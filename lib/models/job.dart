@@ -10,6 +10,7 @@ class Job {
     required this.experienceLevel,
     required this.salaryRange,
     required this.createdAt,
+    this.deadline,
     this.status = 'Active',
     this.description = '',
     this.whatWeOffer,
@@ -29,6 +30,9 @@ class Job {
       experienceLevel: _string(json['experienceLevel']),
       salaryRange: _nullableString(json['salaryRange']),
       createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? ''),
+      deadline: DateTime.tryParse(
+        json['deadline']?.toString() ?? json['Deadline']?.toString() ?? '',
+      ),
       status: _string(json['status'], fallback: 'Active'),
       description: _string(json['description']),
       whatWeOffer: _nullableString(json['whatWeOffer']),
@@ -52,6 +56,7 @@ class Job {
   final String experienceLevel;
   final String? salaryRange;
   final DateTime? createdAt;
+  final DateTime? deadline;
   final String status;
   final String description;
   final String? whatWeOffer;
@@ -106,6 +111,82 @@ class Job {
       'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  bool get isDeadlinePassed =>
+      deadline != null && deadline!.isBefore(DateTime.now());
+
+  String? get formattedDeadline {
+    if (deadline == null) return null;
+    final date = deadline!.toLocal();
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final minute = date.minute.toString().padLeft(2, '0');
+    final period = date.hour >= 12 ? 'PM' : 'AM';
+    return '${months[date.month - 1]} ${date.day}, ${date.year}, $hour:$minute $period';
+  }
+
+  String? get formattedDeadlineFull {
+    if (deadline == null) return null;
+    final date = deadline!.toLocal();
+    const weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const months = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
+    final minute = date.minute.toString().padLeft(2, '0');
+    final period = date.hour >= 12 ? 'PM' : 'AM';
+    return '${weekdays[date.weekday - 1]}, ${months[date.month - 1]} ${date.day}, ${date.year}, $hour:$minute $period';
+  }
+
+  String? get shortDeadlineLabel {
+    if (deadline == null) return null;
+    final date = deadline!.toLocal();
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  String? get deadlineLabel {
+    if (deadline == null) return null;
+    if (isDeadlinePassed) return 'Deadline Passed';
+    return 'Deadline: $formattedDeadline';
   }
 
   List<String> get detailTags => [department, experienceLevel]

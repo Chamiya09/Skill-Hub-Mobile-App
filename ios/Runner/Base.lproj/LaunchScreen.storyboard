@@ -16,13 +16,64 @@
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
-                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="splash-mark">
+                                <rect key="frame" x="159" y="350" width="56" height="56"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="✧" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="splash-sparkle">
+                                        <fontDescription key="fontDescription" type="system" pointSize="34" weight="medium"/>
+                                        <color key="textColor" red="0.0157" green="0.4706" blue="0.3412" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </label>
+                                </subviews>
+                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="splash-sparkle" firstAttribute="centerX" secondItem="splash-mark" secondAttribute="centerX" id="sparkle-center-x"/>
+                                    <constraint firstItem="splash-sparkle" firstAttribute="centerY" secondItem="splash-mark" secondAttribute="centerY" id="sparkle-center-y"/>
+                                    <constraint firstAttribute="width" constant="56" id="mark-width"/>
+                                    <constraint firstAttribute="height" constant="56" id="mark-height"/>
+                                </constraints>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                        <real key="value" value="16"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="layer.borderWidth">
+                                        <real key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="color" keyPath="layer.borderColor">
+                                        <color key="value" red="0.8863" green="0.9098" blue="0.9412" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                            </view>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" text="SkillHub" textAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="splash-wordmark">
+                                <fontDescription key="fontDescription" type="system" pointSize="26" weight="bold"/>
+                                <color key="textColor" red="0.0588" green="0.0902" blue="0.1647" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            </label>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="splash-progress-track">
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="splash-progress-fill">
+                                        <color key="backgroundColor" red="0.0196" green="0.5882" blue="0.4118" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="64" id="progress-fill-width"/>
+                                        </constraints>
+                                    </view>
+                                </subviews>
+                                <color key="backgroundColor" red="0.8863" green="0.9098" blue="0.9412" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstItem="splash-progress-fill" firstAttribute="leading" secondItem="splash-progress-track" secondAttribute="leading" id="progress-fill-leading"/>
+                                    <constraint firstItem="splash-progress-fill" firstAttribute="top" secondItem="splash-progress-track" secondAttribute="top" id="progress-fill-top"/>
+                                    <constraint firstItem="splash-progress-fill" firstAttribute="bottom" secondItem="splash-progress-track" secondAttribute="bottom" id="progress-fill-bottom"/>
+                                    <constraint firstAttribute="width" constant="168" id="progress-track-width"/>
+                                    <constraint firstAttribute="height" constant="3" id="progress-track-height"/>
+                                </constraints>
+                            </view>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0.9725" green="0.9804" blue="0.9882" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
-                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>
+                            <constraint firstItem="splash-mark" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="mark-center-x"/>
+                            <constraint firstItem="splash-mark" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-68" id="mark-center-y"/>
+                            <constraint firstItem="splash-wordmark" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="wordmark-center-x"/>
+                            <constraint firstItem="splash-wordmark" firstAttribute="top" secondItem="splash-mark" secondAttribute="bottom" constant="22" id="wordmark-top"/>
+                            <constraint firstItem="splash-progress-track" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="progress-center-x"/>
+                            <constraint firstItem="splash-progress-track" firstAttribute="top" secondItem="splash-wordmark" secondAttribute="bottom" constant="24" id="progress-top"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -31,7 +82,5 @@
             <point key="canvasLocation" x="53" y="375"/>
         </scene>
     </scenes>
-    <resources>
-        <image name="LaunchImage" width="168" height="185"/>
-    </resources>
+    <resources/>
 </document>

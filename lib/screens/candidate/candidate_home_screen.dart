@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../components/company_logo_button.dart';
+import '../../components/skill_hub_loading_indicator.dart';
 import '../../models/job.dart';
 import '../../services/public_jobs_service.dart';
 import 'find_jobs_screen.dart';
@@ -87,8 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
               sliver: SliverList.list(
                 children: [
                   const SizedBox(height: 8),
-                  const _HeroBadge(),
-                  const SizedBox(height: 18),
                   RichText(
                     textAlign: TextAlign.center,
                     text: const TextSpan(
@@ -100,9 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         letterSpacing: -1,
                       ),
                       children: [
-                        TextSpan(text: 'Find your next role with '),
+                        TextSpan(text: 'Build skills prove your ability.'),
                         TextSpan(
-                          text: 'AI precision',
+                          text: 'Land the right role',
                           style: TextStyle(color: _emeraldDark),
                         ),
                       ],
@@ -179,40 +178,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _HeroBadge extends StatelessWidget {
-  const _HeroBadge();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: const Color(0xFFECFDF5),
-          border: Border.all(color: const Color(0xFFA7F3D0)),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.auto_awesome_rounded, color: _emeraldDark, size: 14),
-            SizedBox(width: 6),
-            Text(
-              'AI-POWERED RECRUITMENT',
-              style: TextStyle(
-                color: _emeraldDark,
-                fontSize: 10,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 0.7,
               ),
             ),
           ],
@@ -340,7 +305,6 @@ class _TrustHighlights extends StatelessWidget {
         _TrustItem(
           label: isLoading ? 'Loading roles...' : '$activeJobs active roles',
         ),
-        const _TrustItem(label: 'AI matching'),
         const _TrustItem(label: 'Direct employers'),
       ],
     );
@@ -376,11 +340,6 @@ class _FeatureStrip extends StatelessWidget {
   const _FeatureStrip();
 
   static const _features = [
-    (
-      Icons.track_changes_rounded,
-      'AI Match Scoring',
-      'Roles ranked against your skills.',
-    ),
     (
       Icons.bolt_rounded,
       'Instant Applications',
@@ -682,9 +641,50 @@ class _JobCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      job.postedLabel,
-                      style: const TextStyle(color: _bodyText, fontSize: 11),
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
+                      runSpacing: 2,
+                      children: [
+                        Text(
+                          job.postedLabel,
+                          style: const TextStyle(
+                            color: _bodyText,
+                            fontSize: 11,
+                          ),
+                        ),
+                        if (job.deadline != null) ...[
+                          const Text(
+                            '•',
+                            style: TextStyle(color: _bodyText, fontSize: 11),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 12,
+                                color: job.isDeadlinePassed
+                                    ? const Color(0xFFEF4444)
+                                    : const Color(0xFFD97706),
+                              ),
+                              const SizedBox(width: 3),
+                              Text(
+                                job.isDeadlinePassed
+                                    ? 'Deadline passed'
+                                    : 'Deadline: ${job.shortDeadlineLabel}',
+                                style: TextStyle(
+                                  color: job.isDeadlinePassed
+                                      ? const Color(0xFFEF4444)
+                                      : const Color(0xFFD97706),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ],
                 ),
@@ -721,20 +721,17 @@ class _JobsLoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(
-        3,
-        (index) => Container(
-          height: 218,
-          margin: const EdgeInsets.only(bottom: 14),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAFC),
-            border: Border.all(color: const Color(0xFFF1F5F9)),
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(color: _emerald, strokeWidth: 2.5),
-          ),
+    return Container(
+      height: 218,
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        border: Border.all(color: const Color(0xFFF1F5F9)),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Center(
+        child: SkillHubLoadingIndicator(
+          message: 'Finding live opportunities...',
         ),
       ),
     );
